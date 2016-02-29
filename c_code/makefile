@@ -12,4 +12,4 @@ gdb:
 	gdb --args ./a.out
 
 valg:
-	valgrind ./a.out
+	valgrind --leak-check=full ./a.out
