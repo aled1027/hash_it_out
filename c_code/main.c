@@ -3,6 +3,16 @@
 #include <stdlib.h>
 #include "cache.h"
 
+void test_insert_bad_key() {
+}
+
+void test_insert_same_key() 
+{
+}
+
+void test_mem_overflow()
+{
+}
 
 void test_cache_space()
 {
@@ -11,7 +21,7 @@ void test_cache_space()
     uint32_t m, mem = 0;
     cache_t c = create_cache(65536, NULL);
     assert(cache_space_used(c) == mem);
-    uint32_t r = rand() % 15;
+    uint32_t r = rand() % 5;
     for (uint32_t i = 0; i < r; i++) {
         k = rand() % 100;
         v = rand() % 255;
@@ -84,7 +94,7 @@ void test_set_get()
 int main(int argc, char *argv[]) 
 {
     assert(argc && argv);
-    test_cache_space();
+    //test_cache_space();
     test_set_get();
     return 0;
 }

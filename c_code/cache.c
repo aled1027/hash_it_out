@@ -7,10 +7,8 @@
 
 #include "cache.h"
 
-const uint16_t MAX_ENTRIES = -1;
+const uint64_t MAX_ENTRIES = 65535;
 const bool debug = true;
-
-
 
 uint64_t modified_jenkins(ckey_t key)
 {
@@ -30,6 +28,7 @@ uint64_t default_hash(ckey_t k)
 
 typedef struct
 {
+    ckey_t key;
     cval_t val;
     uint32_t size; // size of val in bytes
 }
@@ -38,15 +37,14 @@ cache_entry;
 struct cache_obj 
 {
     // http://stackoverflow.com/questions/6316987/should-struct-definitions-go-in-h-or-c-file
+    uint64_t num_entries;
+    uint64_t max_entries; 
     uint64_t memused;
     uint64_t maxmem;
-    uint64_t max_entries; // TODO deal with these values
-    uint64_t num_entries;
 
     cache_entry *entries;
     bool *is_used;
     hash_func hash;
-
 };
 
 cache_t create_cache(uint64_t maxmem, hash_func h) 
@@ -55,6 +53,7 @@ cache_t create_cache(uint64_t maxmem, hash_func h)
 
     c->memused = 0;
     c->maxmem = maxmem;
+    c->num_entries = 0;
     c->max_entries = MAX_ENTRIES;
 
     c->entries = calloc(c->max_entries, sizeof(cache_entry));
@@ -75,25 +74,38 @@ void cache_set(cache_t cache, ckey_t key, cval_t val, uint32_t val_size)
 {
 
     uint64_t hash = cache->hash(key);
-    if (debug) {
-        printf("setting key = %" PRIu8 "\n", *key);
-        printf("setting value = %" PRIu8 "\n", *(uint8_t *) val);
-        printf("hash = %" PRIu64 "\n\n", hash);
+
+    printf("getting key = %" PRIu8 "\n", *key);
+    printf("hash = %" PRIu64 "\n\n", hash);
+
+    ++cache->num_entries;
+    assert(cache->num_entries < cache->max_entries && "this should never happen");
+
+    // check memory
+    cache->memused += val_size;
+    if (cache->memused > cache->maxmem) {
+        // TODO free up memory via an eviction
     }
 
+    // check for collision
     if (cache->is_used[hash]) {
+        // TODO collision
         cache_delete(cache, key);
     }
 
     cache->is_used[hash] = true;
-    cache->memused += val_size;
-    assert(cache->memused < cache->maxmem);
 
+    // add the value
     cache_entry *e = &cache->entries[hash];
-    void *memory = calloc(1, val_size); // to retain constness of e->val
-    memcpy(memory, val, val_size);
     e->size = val_size;
-    e->val = memory;
+
+    void *key_buf = calloc(1, sizeof(*key));
+    memcpy(key_buf, key, sizeof(*key));
+    e->key = key_buf;
+
+    void *val_buf = calloc(1, val_size); // to retain constness of e->val
+    memcpy(val_buf, val, val_size);
+    e->val = val_buf;
 }
 
 cval_t cache_get(cache_t cache, ckey_t key, uint32_t *val_size)
@@ -107,15 +119,16 @@ cval_t cache_get(cache_t cache, ckey_t key, uint32_t *val_size)
     }
 
     if (cache->is_used[hash]) {
-        cache->is_used[hash] = true;
         cache_entry *e = &cache->entries[hash];
-        ret = calloc(1, e->size);
-        memcpy(ret, e->val, e->size);
-        *val_size = e->size;
-    } else {
-        if (debug) {
-            printf("returning null\n\n");
+        if (*e->key == *key) {
+            ret = calloc(1, e->size);
+            memcpy(ret, e->val, e->size);
+            *val_size = e->size;
+        } else {
+            // COLLISION TODO
         }
+
+    } else {
         ret = NULL;
     }
     return ret;
@@ -124,32 +137,35 @@ cval_t cache_get(cache_t cache, ckey_t key, uint32_t *val_size)
 void cache_delete(cache_t cache, ckey_t key) 
 {
     uint64_t hash = cache->hash(key);
-    cache->is_used[hash] = false;
-    free((void *) cache->entries[hash].val); // TODO don't need to do this - use realloc
+    if (cache->is_used) {
+        --cache->num_entries;
+        cache->memused -= cache->entries[hash].size;
+        cache->is_used[hash] = false;
+        free((void *) cache->entries[hash].val); 
+        free((void *) cache->entries[hash].key);
+        cache->entries[hash].val = NULL;
+        cache->entries[hash].key = NULL;
+        cache->entries[hash].size = 0;
+    }
+
 }
 
 uint64_t cache_space_used(cache_t cache)
 {
-    uint64_t mem = 0;
-    for (uint8_t i = 0; i < cache->max_entries; ++i) {
-        uint64_t hash = cache->hash(&i);
-        if (cache->is_used[hash]) {
-            mem += cache->entries[hash].size;
-        }
-    }
-    return mem;
+    return cache->memused;
 }
 
 void destroy_cache(cache_t cache)
 {
     for (uint64_t i = 0; i < cache->max_entries; i++) {
-        free((void *) cache->entries[i].val);
-        cache->entries[i].val = NULL;
+        cache_delete(cache, (ckey_t) &i);
     }
+
     free(cache->entries);
-    cache->entries = NULL;
     free(cache->is_used);
+    cache->entries = NULL;
     cache->is_used = NULL;
+
     free(cache);
     cache = NULL;
 } 
