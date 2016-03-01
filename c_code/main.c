@@ -9,7 +9,7 @@ void test_cache_space()
     // TEST doesn't account for evictions!
     uint8_t k, v;
     uint32_t m, mem = 0;
-    cache_t c = create_cache(100, NULL);
+    cache_t c = create_cache(65536, NULL);
     assert(cache_space_used(c) == mem);
     uint32_t r = rand() % 15;
     for (uint32_t i = 0; i < r; i++) {
@@ -44,9 +44,9 @@ void test_set_get()
     uint8_t *val, k, v;
     uint32_t *size = malloc(sizeof(uint32_t));
 
-    cache_t c = create_cache(100, NULL);
+    cache_t c = create_cache(65536, NULL);
 
-    k = 0;
+    k = 1;
     v = 99;
     cache_set(c, &k, &v, 1);
 
@@ -68,7 +68,7 @@ void test_set_get()
     assert(*val == 255);
     free(val);
 
-    k = 0;
+    k = 1;
     val = (uint8_t *) cache_get(c, &k, size);
     assert(*val == 99);
     free(val);
@@ -80,7 +80,6 @@ void test_set_get()
     free(size);
     destroy_cache(c);
 }
-
 
 int main(int argc, char *argv[]) 
 {
