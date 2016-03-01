@@ -7,7 +7,6 @@
 
 #include "cache.h"
 
-const uint64_t MAX_ENTRIES = 65535;
 const bool debug = true;
 
 uint64_t modified_jenkins(ckey_t key)
@@ -19,12 +18,9 @@ uint64_t modified_jenkins(ckey_t key)
     hash += (hash << 3);
     hash ^= (hash >> 11);
     hash += (hash << 15);
-    return (uint64_t) hash % MAX_ENTRIES;
+    return (uint64_t) hash;
 }
-uint64_t default_hash(ckey_t k)
-{
-    return *k % 100;
-}
+
 
 typedef struct
 {
@@ -32,20 +28,25 @@ typedef struct
     cval_t val;
     uint32_t size; // size of val in bytes
 }
-cache_entry;
+hash_bucket;
 
 struct cache_obj 
 {
     // http://stackoverflow.com/questions/6316987/should-struct-definitions-go-in-h-or-c-file
-    uint64_t num_entries;
-    uint64_t max_entries; 
+    uint64_t used_buckets;
+    uint64_t num_buckets;
     uint64_t memused;
     uint64_t maxmem;
 
-    cache_entry *entries;
+    hash_bucket *buckets;
     bool *is_used;
-    hash_func hash;
+    hash_func hash; // should only be accessed via cache_hash
 };
+
+static uint64_t cache_hash(cache_t cache, ckey_t key) 
+{
+    return cache->hash(key) % cache->num_buckets;
+}
 
 cache_t create_cache(uint64_t maxmem, hash_func h) 
 {
@@ -53,15 +54,14 @@ cache_t create_cache(uint64_t maxmem, hash_func h)
 
     c->memused = 0;
     c->maxmem = maxmem;
-    c->num_entries = 0;
-    c->max_entries = MAX_ENTRIES;
+    c->used_buckets = 0;
+    c->num_buckets = 100; //
 
-    c->entries = calloc(c->max_entries, sizeof(cache_entry));
-    c->is_used = calloc(c->max_entries, sizeof(bool));
-    assert(c->entries && c->is_used);
+    c->buckets = calloc(c->num_buckets, sizeof(hash_bucket));
+    c->is_used = calloc(c->num_buckets, sizeof(bool));
+    assert(c->buckets && c->is_used);
 
     if (h == NULL) {
-        //c->hash = default_hash;
         c->hash = modified_jenkins;
     } else {
         c->hash = h;
@@ -73,14 +73,21 @@ cache_t create_cache(uint64_t maxmem, hash_func h)
 void cache_set(cache_t cache, ckey_t key, cval_t val, uint32_t val_size)
 {
 
-    uint64_t hash = cache->hash(key);
+    uint64_t hash = cache_hash(cache, key);
 
-    printf("getting key = %" PRIu8 "\n", *key);
-    printf("hash = %" PRIu64 "\n\n", hash);
+    if (debug) {
+        printf("setting key = %" PRIu8 "\n", *key);
+        printf("hash = %" PRIu64 "\n", hash);
+        printf("value = %" PRIu8 "\n\n", *(uint8_t *)val);
+    }
 
-    ++cache->num_entries;
-    assert(cache->num_entries < cache->max_entries && "this should never happen");
+    ++cache->used_buckets;
+    // TODO
+    // if (condition for rebalancing):
+    //      cache_rebalance(cache);
+    
 
+    assert(cache->used_buckets < cache->num_buckets && "this should never happen because of auto-balance");
     // check memory
     cache->memused += val_size;
     if (cache->memused > cache->maxmem) {
@@ -93,10 +100,11 @@ void cache_set(cache_t cache, ckey_t key, cval_t val, uint32_t val_size)
         cache_delete(cache, key);
     }
 
+
     cache->is_used[hash] = true;
 
     // add the value
-    cache_entry *e = &cache->entries[hash];
+    hash_bucket *e = &cache->buckets[hash];
     e->size = val_size;
 
     void *key_buf = calloc(1, sizeof(*key));
@@ -111,7 +119,7 @@ void cache_set(cache_t cache, ckey_t key, cval_t val, uint32_t val_size)
 cval_t cache_get(cache_t cache, ckey_t key, uint32_t *val_size)
 {
     void *ret;
-    uint64_t hash = cache->hash(key);
+    uint64_t hash = cache_hash(cache, key);
 
     if (debug) {
         printf("getting key = %" PRIu8 "\n", *key);
@@ -119,7 +127,7 @@ cval_t cache_get(cache_t cache, ckey_t key, uint32_t *val_size)
     }
 
     if (cache->is_used[hash]) {
-        cache_entry *e = &cache->entries[hash];
+        hash_bucket *e = &cache->buckets[hash];
         if (*e->key == *key) {
             ret = calloc(1, e->size);
             memcpy(ret, e->val, e->size);
@@ -136,16 +144,16 @@ cval_t cache_get(cache_t cache, ckey_t key, uint32_t *val_size)
 
 void cache_delete(cache_t cache, ckey_t key) 
 {
-    uint64_t hash = cache->hash(key);
+    uint64_t hash = cache_hash(cache, key);
     if (cache->is_used) {
-        --cache->num_entries;
-        cache->memused -= cache->entries[hash].size;
+        --cache->num_buckets;
+        cache->memused -= cache->buckets[hash].size;
         cache->is_used[hash] = false;
-        free((void *) cache->entries[hash].val); 
-        free((void *) cache->entries[hash].key);
-        cache->entries[hash].val = NULL;
-        cache->entries[hash].key = NULL;
-        cache->entries[hash].size = 0;
+        free((void *) cache->buckets[hash].val); 
+        free((void *) cache->buckets[hash].key);
+        cache->buckets[hash].val = NULL;
+        cache->buckets[hash].key = NULL;
+        cache->buckets[hash].size = 0;
     }
 
 }
@@ -157,13 +165,14 @@ uint64_t cache_space_used(cache_t cache)
 
 void destroy_cache(cache_t cache)
 {
-    for (uint64_t i = 0; i < cache->max_entries; i++) {
+    for (uint64_t i = 0; i < cache->num_buckets; i++) {
+        uint64_t hash = cache_hash(cache, (ckey_t) &i);
         cache_delete(cache, (ckey_t) &i);
     }
 
-    free(cache->entries);
+    free(cache->buckets);
     free(cache->is_used);
-    cache->entries = NULL;
+    cache->buckets = NULL;
     cache->is_used = NULL;
 
     free(cache);
