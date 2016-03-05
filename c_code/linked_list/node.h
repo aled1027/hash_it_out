@@ -10,7 +10,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include "cache.h"
+#include "../cache.h"
 
 // struct _node_t;
 typedef struct _node_t node_t;

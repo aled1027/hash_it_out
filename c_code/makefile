@@ -7,7 +7,7 @@ default:
 	gcc $(CFLAGS) cache.c main.c  $(LIBS)
 
 test_dbLL:
-	gcc $(CFLAGS) node.c dbLL.c dbLL_tests.c  $(LIBS) -o dbll.o
+	gcc $(CFLAGS) linked_list/node.c linked_list/dbLL.c linked_list/dbLL_tests.c  $(LIBS) -o linked_list/dbll.o
 
 run:
 	./a.out
