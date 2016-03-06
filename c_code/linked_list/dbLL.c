@@ -7,12 +7,6 @@
 
 #include "dbLL.h"
 
-typedef struct _dbLL_t{
-  node_t *head;
-  node_t *tail;
-  uint32_t size;
-} dbLL_t;
-
 dbLL_t *new_list(){
   dbLL_t *list = (dbLL_t *)calloc(1, sizeof(dbLL_t));
   list->head = NULL;
@@ -21,14 +15,16 @@ dbLL_t *new_list(){
   return list;
 };
 
-void insert(dbLL_t *list, ckey_t key, cval_t val, uint32_t val_size){
+void ll_insert(dbLL_t *list, ckey_t key, cval_t val, uint32_t val_size){
   node_t *node = new_node(key, val, val_size);
 
   if ((list->size) == 0){
+    printf("EMPTY LIST: Inserting a new node with key: %d, val: %d\n", *node->key, *(uint8_t *)node->val);
     list->head = node;
     list->tail = node;
   }
   else{
+    printf("EXISTING LIST: Inserting a new node with key: %d, val: %d\n", *node->key, *(uint8_t *)node->val);
     node->next = list->head;
     list->head->prev = node;
     list->head = node;
@@ -36,7 +32,7 @@ void insert(dbLL_t *list, ckey_t key, cval_t val, uint32_t val_size){
   list->size += 1;
 };
 
-cval_t search(dbLL_t *list, ckey_t key){
+cval_t ll_search(dbLL_t *list, ckey_t key){
   void *ret_val;
   node_t *cur = list->head;
   while(cur != NULL){
@@ -50,16 +46,18 @@ cval_t search(dbLL_t *list, ckey_t key){
       cur = cur->next;
     }
   }
+  ret_val = calloc(12, sizeof(uint8_t));
+  strcpy(ret_val, "invalid key");
   printf("Sorry, there wasn't anything with key: %d to find.\n", *key);
-  return NULL;
+  return ret_val;
 }
 
-uint8_t remove_key(dbLL_t *list, ckey_t key){
+uint32_t ll_remove_key(dbLL_t *list, ckey_t key){
   node_t *cur = list->head;
-  uint8_t removed = 0;
-  while((cur != NULL) &&(removed == 0)){
+  uint32_t val_size = 0;
+  while((cur != NULL) &&(val_size == 0)){
     if (*cur->key == *key){
-      removed = 1;
+      val_size = cur->val_size;
       if((cur == list->head) && (cur == list->tail)){
         printf("cur head & tail ");
         list->head = NULL;
@@ -79,21 +77,32 @@ uint8_t remove_key(dbLL_t *list, ckey_t key){
         cur->prev->next = cur->next;
         cur->next->prev = cur->prev;
       }
-      printf("a node with key: %d and value: %d was found and removed.\n", *cur->key, *(uint8_t *)cur->val);
+      printf("a node with key: %d and value: %d and value size: %d was found and removed.\n", *cur->key, *(uint8_t *)cur->val, val_size);
       free((void *)cur->key);
       free((void *)cur->val);
       free(cur);
       list->size -= 1;
-      return removed;
+      return val_size;
     }
     else{
       cur = cur->next;
     }
   }
-  if(!removed){
+  if(!val_size){
     printf("Sorry, there wasn't anything with key: %d to remove.\n", *key);
   }
-  return removed;
+  return val_size;
+};
+
+void destroy_list(dbLL_t *list){
+  node_t *cur = list->head;
+  while (cur != NULL){
+    cur = cur->next;
+    free((void *)cur->key);
+    free((void *)cur->val);
+    free(cur);
+  }
+  free(list);
 };
 
 void rep_list(dbLL_t *list){
