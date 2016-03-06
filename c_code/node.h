@@ -9,6 +9,7 @@
 #define _NODE_H
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
 #include <stdio.h>
 // #include "../cache.h"
 

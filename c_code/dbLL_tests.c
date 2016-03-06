@@ -47,7 +47,6 @@ void test_dbLL_insert(dbLL_t *test_ll){
     printf("************************************************\n");
 }
 
-
 void test_dbLL_search(dbLL_t *test_ll){
     printf("\n************************************************\n");
     printf("*** testing SEARCH on the doubly linked list ***\n");
@@ -137,13 +136,13 @@ void test_dbLL_remove(dbLL_t *test_ll){
     printf("************************************************\n");
 }
 
-int main(int argc, char *argv[]) 
-{
-    assert(argc && argv);
-    dbLL_t *test_ll = test_dbLL_creation();
-    test_dbLL_insert(test_ll);
-    test_dbLL_search(test_ll);
-    test_dbLL_remove(test_ll);
-
-    return 0;
-}
+//int main(int argc, char *argv[]) 
+//{
+//    assert(argc && argv);
+//    dbLL_t *test_ll = test_dbLL_creation();
+//    test_dbLL_insert(test_ll);
+//    test_dbLL_search(test_ll);
+//    test_dbLL_remove(test_ll);
+//
+//    return 0;
+//}

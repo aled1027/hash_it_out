@@ -4,6 +4,8 @@
  * 3.4.16
  *
 */
+#pragma once
+
 #include "node.h"
 
 typedef struct _dbLL_t dbLL_t;

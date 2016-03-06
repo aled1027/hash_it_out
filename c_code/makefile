@@ -1,36 +1,35 @@
 
-#SOURCES=$(wildcard *.c)
-#OBJECTS=$(SOURCES:.c=.o)
-#
-#CC=gcc
-#
-CFLAGS = -g -O0 -Wall -Wextra -pedantic -Werror -std=gnu11
-#CFLAGS = -g -O0 -std=gnu11
-#
-#LIBS = 
-#
-#all: main
-#
-#main: $(OBJECTS)
-#	$(CC) $(OBJECTS) -o a.out $(CFLAGS) $(LIBS)
-#
-#$(OBJECTS): ./%.o : ./%.c
-#	$(CC) -c $< -o $@ $(CFLAGS)
+SOURCES=$(wildcard *.c)
+OBJECTS=$(SOURCES:.c=.o)
 
-default:
-	gcc $(CFLAGS) cache.c main.c  $(LIBS)
+CC=gcc
+CFLAGS=-g -O0 -Wall -Wextra -pedantic -Werror -std=gnu11
+LIBS=
 
-test_dbLL:
-	gcc $(CFLAGS) linked_list/node.c linked_list/dbLL.c linked_list/dbLL_tests.c  -o linked_list/dbll.o
+all: main
 
-test_cache_collision: cache_collision_tests.c cache_collision.c linked_list/dbLL.c linked_list/node.c
-	gcc $(CFLAGS) cache_collision_tests.c cache_collision.c linked_list/dbLL.c linked_list/node.c -o cache_collision.o
+main: $(OBJECTS)
+	$(CC) $(OBJECTS) -o a.out $(CFLAGS) $(LIBS)
 
+$(OBJECTS): ./%.o : ./%.c
+	$(CC) -c $< -o $@ $(CFLAGS)
+
+#default:
+#	gcc $(CFLAGS) cache.c main.c  $(LIBS)
+#
+#test_dbLL:
+#	gcc $(CFLAGS) linked_list/node.c linked_list/dbLL.c linked_list/dbLL_tests.c  -o linked_list/dbll.o
+#
+#test_cache_collision: cache_collision_tests.c cache_collision.c linked_list/dbLL.c linked_list/node.c
+#	gcc $(CFLAGS) cache_collision_tests.c cache_collision.c linked_list/dbLL.c linked_list/node.c -o cache_collision.o
+#
+clean:
+	rm *.o; rm a.out
 run:
 	./a.out --cache-tests --dbll-tests
-
+#
 gdb:
-	gdb --args ./a.out
+	gdb --args ./a.out --cache-tests --dbll-tests
 
 valg:
 	valgrind --leak-check=full ./a.out

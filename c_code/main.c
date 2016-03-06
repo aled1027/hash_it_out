@@ -26,7 +26,7 @@ static struct option opts[] =
     {"dbll-tests", no_argument, 0, 'd'},
 };
 
-void test_mem_overflow()
+static void test_mem_overflow()
 {
     cache_t c = create_cache(10, NULL);
     assert(cache_space_used(c) == 0);
@@ -39,24 +39,37 @@ void test_mem_overflow()
     cache_set(c, &key2, &val2, 6);
 }
 
-void test_set_get()
+static void print_key(ckey_t key)
+{
+    uint32_t i = 0;
+    while (key[i]) {
+        printf("%" PRIu32 ", ", key[i]);
+        ++i;
+    }
+    printf("\n");
+}
+
+static void test_set_get()
 {
     // TEST doesn't account for evictions!
     cache_t c = create_cache(65536, NULL);
     assert(cache_space_used(c) == 0);
 
-    //uint32_t nsets = rand() % 50;
-    uint32_t nsets = 5;
-    uint8_t **saved_keys = calloc(nsets, sizeof(ckey_t));
+    //uint32_t nsets = rand() % 35;
+    uint32_t nsets = 25;
+
+    uint8_t **saved_keys = calloc(nsets, sizeof(uint8_t*));
     uint8_t *saved_vals = calloc(nsets, sizeof(uint8_t));
 
     for (uint32_t i = 0; i < nsets; i++) {
-        uint32_t key_size = rand() % 10;
+        //uint32_t key_size = (rand() % 10) + 2;
+        uint32_t key_size = 10;
         saved_keys[i] = calloc(key_size, sizeof(uint8_t));
         for (uint32_t j = 0; j < key_size - 1; j++) {
             saved_keys[i][j] = rand() % 255;
         }
         saved_keys[i][key_size - 1] = '\0';
+        print_key(saved_keys[i]);
         saved_vals[i] = rand() % 255;
         uint32_t m = 1;
         cache_set(c, saved_keys[i], &saved_vals[i], m);
@@ -82,7 +95,7 @@ void test_set_get()
     saved_vals = NULL;
 }
 
-void test_collision()
+static void test_collision()
 {
     // TODO write this someway where they don't use the same key
     // need access to the hash function
@@ -97,7 +110,7 @@ void test_collision()
     cache_set(c, &key2, &val2, 4);
 }
 
-void test_space()
+static void test_space()
 {
     cache_t c = create_cache(100, NULL);
     assert(cache_space_used(c) == 0);
