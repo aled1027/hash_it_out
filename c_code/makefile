@@ -1,7 +1,22 @@
+
+#SOURCES=$(wildcard *.c)
+#OBJECTS=$(SOURCES:.c=.o)
+#
+#CC=gcc
+#
 CFLAGS = -g -O0 -Wall -Wextra -pedantic -Werror -std=gnu11
 #CFLAGS = -g -O0 -std=gnu11
+#
+#LIBS = 
+#
+#all: main
+#
+#main: $(OBJECTS)
+#	$(CC) $(OBJECTS) -o a.out $(CFLAGS) $(LIBS)
+#
+#$(OBJECTS): ./%.o : ./%.c
+#	$(CC) -c $< -o $@ $(CFLAGS)
 
-LIBS = 
 default:
 	gcc $(CFLAGS) cache.c main.c  $(LIBS)
 
