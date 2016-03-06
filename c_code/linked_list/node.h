@@ -10,7 +10,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include "../cache.h"
+// #include "../cache.h"
+
+typedef const uint8_t *ckey_t;
+typedef const void *cval_t;
 
 typedef struct _node_t node_t;
 struct _node_t

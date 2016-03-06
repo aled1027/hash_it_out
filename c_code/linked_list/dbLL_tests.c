@@ -1,6 +1,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "dbLL.h"
 
 
@@ -19,26 +20,27 @@ void test_dbLL_insert(dbLL_t *test_ll){
     printf("\n************************************************\n");
     printf("*** testing INSERTION on the doubly linked list ***\n");
     printf("************************************************\n");
-    uint8_t key, val;
+    uint8_t key;
+    uint8_t val;
 
     key = 1;
     val = 99;
-    insert(test_ll, &key, &val, 1);
+    ll_insert(test_ll, &key, &val, 1);
     rep_list(test_ll);
 
     key = 89;
     val = 23;
-    insert(test_ll, &key, &val, 1);
+    ll_insert(test_ll, &key, &val, 1);
     rep_list(test_ll);
 
     key = 12;
     val = 25;
-    insert(test_ll, &key, &val, 1);
+    ll_insert(test_ll, &key, &val, 1);
     rep_list(test_ll);
 
     key = 30;
     val = 255;
-    insert(test_ll, &key, &val, 1);
+    ll_insert(test_ll, &key, &val, 1);
     rep_list(test_ll);
 
     printf("*** ... done testing insertion ***\n");
@@ -56,23 +58,24 @@ void test_dbLL_search(dbLL_t *test_ll){
     //search for some values in the list
     key = 1;
     val = 99;
-    res = (uint8_t *)search(test_ll, &key);
+    res = (uint8_t *)ll_search(test_ll, &key);
     assert(*res == val);
 
     key = 89;
     val = 23;
-    res = (uint8_t *)search(test_ll, &key);
+    res = (uint8_t *)ll_search(test_ll, &key);
     assert(*res == val);
 
     key = 30;
     val = 255;
-    res = (uint8_t *)search(test_ll, &key);
+    res = (uint8_t *)ll_search(test_ll, &key);
     assert(*res == val);
 
     //(try to) search for some value not in the list 
     key = 10;
-    res = (uint8_t *)search(test_ll, &key);
-    assert(res == NULL);
+    const char *invalid = "invalid key";
+    res = (uint8_t *)ll_search(test_ll, &key);
+    assert(strcmp(invalid, (char *)res) == 0);
 
     rep_list(test_ll);
     printf("*** ... done testing search\n");
@@ -86,49 +89,49 @@ void test_dbLL_remove(dbLL_t *test_ll){
     printf("************************************************\n");
     uint8_t key;
     uint8_t val;
-    uint8_t res;
+    uint32_t res; //actually holds the value size
     rep_list(test_ll);
 
     //remove a middle value
     key = 89;
     val = 23;
     assert(val + 1 > 0); // use val to pass compiler warnings
-    res = remove_key(test_ll, &key);
-    assert(res == 1);
+    res = ll_remove_key(test_ll, &key);
+    assert(res > 0);
     rep_list(test_ll);
 
     //remove the tail
     key = 30;
     val = 255;
-    res = remove_key(test_ll, &key);
-    assert(res == 1);
+    res = ll_remove_key(test_ll, &key);
+    assert(res > 0);
     rep_list(test_ll);
 
     //(try to) remove a non-existent value
     key = 10;
-    res = remove_key(test_ll, &key);
+    res = ll_remove_key(test_ll, &key);
     assert(res == 0);
     rep_list(test_ll);
 
     //remove the head
     key = 1;
     val = 99;
-    res = remove_key(test_ll, &key);
-    assert(res == 1);
+    res = ll_remove_key(test_ll, &key);
+    assert(res > 0);
     rep_list(test_ll);
 
     //(try to) remove something we've already removed
     key = 30;
     val = 255;
-    res = remove_key(test_ll, &key);
+    res = ll_remove_key(test_ll, &key);
     assert(res == 0);
     rep_list(test_ll);
 
     //remove the remaining value in the list, both the head & the tail
     key = 12;
     val = 25;
-    res = remove_key(test_ll, &key);
-    assert(res == 1);
+    res = ll_remove_key(test_ll, &key);
+    assert(res > 0);
     rep_list(test_ll);
     printf("*** ... done testing removal\n");
     printf("************************************************\n");
