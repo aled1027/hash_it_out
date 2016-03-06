@@ -77,7 +77,7 @@ void test_set_get(cache_t c){
     cache_set(c, &k, &v, 1);
 
     k = 101;
-    v = 420;
+    v = 69;
     cache_set(c, &k, &v, 1);
 
     printf("\ntesting get\n");
@@ -85,7 +85,7 @@ void test_set_get(cache_t c){
     k = 89;
     val = (uint8_t *) cache_get(c, &k, size);
     assert(*val == 23);
-    
+
     k = 30;
     val = (uint8_t *) cache_get(c, &k, size);
     assert(*val == 255);
@@ -97,14 +97,15 @@ void test_set_get(cache_t c){
     k = 10;
     const char *invalid = "invalid key";
     val = (uint8_t *) cache_get(c, &k, size);
-    assert(strcmp(invalid, val) == 0);
+    assert(strcmp(invalid, (char *)val) == 0);
 
     free(size);
 }
 
 void test_destroy_cache(cache_t c){
     printf("testing....");
-};
+    destroy_cache(c);
+}
 
 int main(int argc, char *argv[]) 
 {

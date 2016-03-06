@@ -96,6 +96,7 @@ void cache_set(cache_t cache, ckey_t key, cval_t val, uint32_t val_size){
 
 cval_t cache_get(cache_t cache, ckey_t key, uint32_t *val_size){
     uint64_t hash = cache_hash(cache, key);
+    *val_size = 2; //not sure why this is in the function signature since we don't need it
 
     if (debug) {
         printf("getting key = %" PRIu8 "\n", *key);
