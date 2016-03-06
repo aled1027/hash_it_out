@@ -15,6 +15,7 @@
    node: prev_node
  */
 //create a new node with a key, value, and the size of the value
+
 node_t *new_node(ckey_t key, cval_t val, uint32_t val_size){
   node_t *node = (node_t *)calloc(1, sizeof(node_t));
 
