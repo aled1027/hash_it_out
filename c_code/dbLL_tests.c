@@ -2,7 +2,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 #include "dbLL.h"
+#include "dbLL_tests.h"
 
 
 
@@ -138,13 +140,10 @@ void test_dbLL_remove(dbLL_t *test_ll){
     printf("************************************************\n");
 }
 
-//int main(int argc, char *argv[]) 
-//{
-//    assert(argc && argv);
-//    dbLL_t *test_ll = test_dbLL_creation();
-//    test_dbLL_insert(test_ll);
-//    test_dbLL_search(test_ll);
-//    test_dbLL_remove(test_ll);
-//
-//    return 0;
-//}
+void dbll_tests()
+{
+    dbLL_t *test_ll = test_dbLL_creation();
+    test_dbLL_insert(test_ll);
+    test_dbLL_search(test_ll);
+    test_dbLL_remove(test_ll);
+}

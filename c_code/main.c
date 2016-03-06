@@ -5,7 +5,7 @@
 #include <getopt.h>
 #include <time.h>
 
-// #include "linked_list/dbLL_tests.h"
+#include "dbLL_tests.h"
 #include "cache.h"
 
 // someone used this fancy command line argument stuff
@@ -142,7 +142,7 @@ static int go(struct args *args)
 
     if (args->dbll_tests) {
         printf("Running dbll tests\n");
-        // dbll_tests();
+        dbll_tests();
     }
     return 0;
 }
