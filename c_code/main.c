@@ -2,14 +2,41 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <getopt.h>
+
+// #include "linked_list/dbLL_tests.h"
 #include "cache.h"
 
-void test_insert_same_key_twice() 
+// someone used this fancy command line argument stuff
+// in a project I was working on, and I wanted to try it out
+struct args {
+    bool cache_tests;
+    bool dbll_tests;
+ };
+
+static void args_init(struct args * args)
 {
+    args->cache_tests = false;
+    args->dbll_tests = false;
 }
+
+static struct option opts[] =
+{
+    {"cache-tests", no_argument, 0, 'c'},
+    {"dbll-tests", no_argument, 0, 'd'},
+};
 
 void test_mem_overflow()
 {
+    cache_t c = create_cache(10, NULL);
+    assert(cache_space_used(c) == 0);
+    uint8_t key = 10;
+    uint8_t val[6] = {10,11,12,13,14,15};
+    cache_set(c, &key, &val, 6);
+
+    uint8_t key2 = 11;
+    uint8_t val2[6] = {20,21,22,23,24,25};
+    cache_set(c, &key2, &val2, 6);
 }
 
 void test_set_get()
@@ -55,18 +82,77 @@ void test_set_get()
     saved_vals = NULL;
 }
 
-void test_delete_cache()
+void test_collision()
 {
+    // TODO write this someway where they don't use the same key
+    // need access to the hash function
+    cache_t c = create_cache(100, NULL);
+    assert(cache_space_used(c) == 0);
+    uint8_t key = 10;
+    uint8_t val[6] = {10,11,12,13,14,15};
+    cache_set(c, &key, &val, 6);
+
+    uint8_t key2 = 10;
+    uint8_t val2[4] = {20,21,22,23};
+    cache_set(c, &key2, &val2, 4);
 }
 
-void test_collision_cache()
+void test_space()
 {
+    cache_t c = create_cache(100, NULL);
+    assert(cache_space_used(c) == 0);
+    uint8_t key = 10;
+    uint8_t val[6] = {10,11,12,13,14,15};
+    cache_set(c, &key, &val, 6);
+
+    uint8_t key2 = 11;
+    uint8_t val2[4] = {20,21,22,23};
+    cache_set(c, &key2, &val2, 4);
+
+    assert(10 == cache_space_used(c));
+}
+
+static void cache_tests()
+{
+    test_mem_overflow();
+    test_set_get();
+    test_collision();
+    test_space();
+}
+
+static int go(struct args *args)
+{
+    if (args->cache_tests) {
+        printf("Running cache tests\n");
+        cache_tests();
+    }
+
+    if (args->dbll_tests) {
+        printf("Running dbll tests\n");
+        // dbll_tests();
+    }
+    return 0;
 }
 
 int main(int argc, char *argv[]) 
 {
     assert(argc && argv);
-    //test_cache_space();
-    test_set_get();
-    return 0;
+
+    struct args args;
+    args_init(&args);
+
+    int c, idx;
+    while ((c = getopt_long(argc, argv, "", opts, &idx)) != -1) {
+        switch(c) {
+            case 'c':
+                args.cache_tests = true;
+                break;
+            case 'd':
+                args.dbll_tests = true;
+                break;
+            default:
+                break;
+        }
+    }
+    return go(&args);
 }

@@ -10,7 +10,7 @@ test_dbLL:
 	gcc $(CFLAGS) linked_list/node.c linked_list/dbLL.c linked_list/dbLL_tests.c  $(LIBS) -o linked_list/dbll.o
 
 run:
-	./a.out
+	./a.out --cache-tests --dbll-tests
 
 gdb:
 	gdb --args ./a.out

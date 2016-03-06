@@ -85,11 +85,12 @@ void cache_set(cache_t cache, ckey_t key, cval_t val, uint32_t val_size)
     // if (condition for rebalancing):
     //      cache_rebalance(cache);
     
-
     assert(cache->used_buckets < cache->num_buckets && "this should never happen because of auto-balance");
+
     // check memory
     cache->memused += val_size;
     if (cache->memused > cache->maxmem) {
+        printf("TODO maxmem exceeded\n");
         // TODO free up memory via an eviction
     }
 
@@ -141,7 +142,6 @@ cval_t cache_get(cache_t cache, ckey_t key, uint32_t *val_size)
     }
     return ret;
 }
-
 
 void cache_delete(cache_t cache, ckey_t key) 
 {
