@@ -21,12 +21,11 @@ node_t *new_node(ckey_t key, cval_t val, uint32_t val_size){
 
   node->val_size = val_size;
   
-  void *keybuf = calloc(1, sizeof(*key));
-  memcpy(keybuf, key, sizeof(*key));
-  node->key = keybuf;
+  node->key= calloc(strlen((const char*) key) + 1, sizeof(uint8_t));
+  strcpy((char *) node->key, (const char*) key);
 
-  void *valbuf = calloc(1, val_size);
-  memcpy(valbuf, val, val_size);
+  void *valbuf = calloc(val_size, sizeof(uint8_t));
+  memcpy(valbuf, val, val_size * sizeof(uint8_t));
   node->val = valbuf;
 
   node->next = NULL;

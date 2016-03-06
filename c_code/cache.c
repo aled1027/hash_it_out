@@ -35,6 +35,10 @@ struct cache_obj
     hash_bucket **buckets;
     bool *is_used;
     hash_func hash; // should only be accessed via cache_hash
+
+    // buckets[i] holds a pointer to a double linked list
+    // in the double linked list, nodes in the double linked list
+    // are hash buckets
 };
 
 static uint64_t cache_hash(cache_t cache, ckey_t key) 
@@ -42,32 +46,28 @@ static uint64_t cache_hash(cache_t cache, ckey_t key)
     return cache->hash(key) % cache->num_buckets;
 }
 
-cache_t create_cache(uint64_t maxmem, hash_func h){
+cache_t create_cache(uint64_t maxmem, hash_func h)
+{
     cache_t c = calloc(1, sizeof(struct cache_obj));
 
     c->memused = 0;
     c->maxmem = maxmem;
     c->used_buckets = 0;
-    c->num_buckets = 100; //
+    c->num_buckets = 1000;
 
-    c->buckets = calloc(c->num_buckets, sizeof(hash_bucket));
-    for(uint32_t i = 0; i<c->num_buckets; i++){
+    c->buckets = calloc(c->num_buckets, sizeof(hash_bucket*));
+    assert(c->buckets);
+    for (uint32_t i = 0; i < c->num_buckets; i++){
         c->buckets[i] = new_list();
     }
     c->is_used = calloc(c->num_buckets, sizeof(bool));
-    assert(c->buckets && c->is_used);
-
-    if (h == NULL) {
-        c->hash = modified_jenkins;
-    } else {
-        c->hash = h;
-    }
-
+    assert(c->is_used);
+    c->hash = (h) ? h : modified_jenkins;
     return c;
 }
 
- void cache_set(cache_t cache, ckey_t key, cval_t val, uint32_t val_size){
-
+void cache_set(cache_t cache, ckey_t key, cval_t val, uint32_t val_size)
+{
     uint64_t hash = cache_hash(cache, key);
 
     if (debug) {
@@ -82,7 +82,9 @@ cache_t create_cache(uint64_t maxmem, hash_func h){
     //      cache_rebalance(cache);
     
 
-    assert(cache->used_buckets < cache->num_buckets && "this should never happen because of auto-balance");
+    assert(cache->used_buckets < cache->num_buckets && 
+            "this should never happen because of auto-balance");
+
     // check memory
     cache->memused += val_size;
     if (cache->memused > cache->maxmem) {
@@ -95,9 +97,9 @@ cache_t create_cache(uint64_t maxmem, hash_func h){
     ll_insert(e, key, val, val_size);
 }
 
-cval_t cache_get(cache_t cache, ckey_t key, uint32_t *val_size){
+cval_t cache_get(cache_t cache, ckey_t key, uint32_t *val_size)
+{
     uint64_t hash = cache_hash(cache, key);
-    *val_size = 2; //not sure why this is in the function signature since we don't need it
 
     if (debug) {
         printf("getting key = %" PRIu8 "\n", *key);
@@ -105,30 +107,33 @@ cval_t cache_get(cache_t cache, ckey_t key, uint32_t *val_size){
     }
 
     hash_bucket *e = cache->buckets[hash];
-    void *res = (void *)ll_search(e, key);
+    void *res = (void *) ll_search(e, key, val_size);
     return res;
 }
 
-void cache_delete(cache_t cache, ckey_t key) {
+void cache_delete(cache_t cache, ckey_t key) 
+{
     uint64_t hash = cache_hash(cache, key);
     uint32_t val_size;
     hash_bucket *e = cache->buckets[hash];
     val_size = ll_remove_key(e, key);
     cache->memused -= val_size;
 
-    if(e->size == 0){
+    if (e->size == 0) {
         cache->is_used[hash] = false;
-        cache->used_buckets -= 1;
+        --cache->used_buckets;
     }
 }
 
-uint64_t cache_space_used(cache_t cache){
+uint64_t cache_space_used(cache_t cache)
+{
     return cache->memused;
 }
 
-void destroy_cache(cache_t cache){
+void destroy_cache(cache_t cache)
+{
     for (uint64_t i = 0; i < cache->num_buckets; i++) {
-        if (cache->buckets[i]->size != 0){
+        if (cache->buckets[i]->size != 0) {
             destroy_list(cache->buckets[i]);
         }
     }

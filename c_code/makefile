@@ -3,7 +3,7 @@ SOURCES=$(wildcard *.c)
 OBJECTS=$(SOURCES:.c=.o)
 
 CC=gcc
-CFLAGS=-g -O0 -Wall -Wextra -pedantic -Werror -std=gnu11
+CFLAGS=-g -O0 -Wall -Wextra -pedantic -Werror -std=gnu11 -Wno-unused-function
 LIBS=
 
 all: main

@@ -25,7 +25,7 @@ uint32_t ll_remove_key(dbLL_t *list, ckey_t key);
 
 // search list for key. If the key is found, return the value. 
 // If the key is not found, NULL is returned
-cval_t ll_search(dbLL_t *list, ckey_t key);
+cval_t ll_search(dbLL_t *list, ckey_t key, uint32_t *val_size);
 
 // prints the entire list to stdout
 void rep_list(dbLL_t *list);

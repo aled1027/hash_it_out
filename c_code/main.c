@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <getopt.h>
+#include <time.h>
 
 // #include "linked_list/dbLL_tests.h"
 #include "cache.h"
@@ -56,7 +57,7 @@ static void test_set_get()
     assert(cache_space_used(c) == 0);
 
     //uint32_t nsets = rand() % 35;
-    uint32_t nsets = 25;
+    uint32_t nsets = 35;
 
     uint8_t **saved_keys = calloc(nsets, sizeof(uint8_t*));
     uint8_t *saved_vals = calloc(nsets, sizeof(uint8_t));
@@ -69,7 +70,6 @@ static void test_set_get()
             saved_keys[i][j] = rand() % 255;
         }
         saved_keys[i][key_size - 1] = '\0';
-        print_key(saved_keys[i]);
         saved_vals[i] = rand() % 255;
         uint32_t m = 1;
         cache_set(c, saved_keys[i], &saved_vals[i], m);
@@ -149,6 +149,7 @@ static int go(struct args *args)
 
 int main(int argc, char *argv[]) 
 {
+    srand(time(NULL));
     assert(argc && argv);
 
     struct args args;

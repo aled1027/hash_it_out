@@ -5,10 +5,15 @@
  *
 */
 
+#include <assert.h>
+#include <stdint.h>
+#include <inttypes.h>
+#include <stdio.h>
 #include "dbLL.h"
 
 dbLL_t *new_list(){
-  dbLL_t *list = (dbLL_t *)calloc(1, sizeof(dbLL_t));
+  dbLL_t *list = (dbLL_t *) calloc(1, sizeof(dbLL_t));
+  assert(list);
   list->head = NULL;
   list->tail = NULL;
   list->size = 0;
@@ -32,22 +37,20 @@ void ll_insert(dbLL_t *list, ckey_t key, cval_t val, uint32_t val_size){
   list->size += 1;
 }
 
-cval_t ll_search(dbLL_t *list, ckey_t key){
-  void *ret_val;
+cval_t ll_search(dbLL_t *list, ckey_t key, uint32_t *val_size){
+  void *ret_val = NULL;
   node_t *cur = list->head;
   while(cur != NULL){
-    if(*cur->key == *key){
+    if(strcmp((const char*) cur->key, (const char*) key) == 0){
       ret_val = calloc(1, cur->val_size);
       memcpy(ret_val, cur->val, cur->val_size);
-      //printf("a node with key: %d and value: %d was found.\n", *cur->key, *(uint8_t *)ret_val);
+      *val_size = cur->val_size;
       return ret_val;
     }
     else{
       cur = cur->next;
     }
   }
-  ret_val = calloc(12, sizeof(uint8_t));
-  strcpy(ret_val, "invalid key");
   //printf("Sorry, there wasn't anything with key: %d to find.\n", *key);
   return ret_val;
 }
