@@ -19,7 +19,7 @@ dbLL_t *new_list(){
   list->tail = NULL;
   list->size = 0;
   return list;
-};
+}
 
 void insert(dbLL_t *list, ckey_t key, cval_t val, uint32_t val_size){
   node_t *node = new_node(key, val, val_size);
@@ -34,7 +34,7 @@ void insert(dbLL_t *list, ckey_t key, cval_t val, uint32_t val_size){
     list->head = node;
   }
   list->size += 1;
-};
+}
 
 cval_t search(dbLL_t *list, ckey_t key){
   void *ret_val;
@@ -94,7 +94,7 @@ uint8_t remove_key(dbLL_t *list, ckey_t key){
     printf("Sorry, there wasn't anything with key: %d to remove.\n", *key);
   }
   return removed;
-};
+}
 
 void rep_list(dbLL_t *list){
   printf("linked list: \n\tsize: %d\n", list->size);
@@ -105,5 +105,5 @@ void rep_list(dbLL_t *list){
     cur = cur->next;
   }
   printf("...done printing list\n\n");
-};
+}
 

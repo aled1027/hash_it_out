@@ -32,18 +32,18 @@ node_t *new_node(ckey_t key, cval_t val, uint32_t val_size){
   node->prev = NULL;
 
   return node;
-};
+}
 
 //given nodes A, B, update either A's next or prev pointer to be node B
 void set_next(node_t *node, node_t *next_node){
   node->next = next_node;
-};
+}
 
 void set_prev(node_t *node, node_t *prev_node){
   node->prev = prev_node;
-};
+}
 
 //represent the node (print it)
 void rep_node(node_t *node){
   printf("key: %d; value: %d\n", *node->key, *(uint8_t *)node->val);
-};
+}

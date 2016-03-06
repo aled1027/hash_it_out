@@ -13,7 +13,7 @@ dbLL_t *test_dbLL_creation(){
     printf("\n*** ... done testing creation ***\n");
     printf("************************************************\n");
     return test_ll;
-};
+}
 
 void test_dbLL_insert(dbLL_t *test_ll){
     printf("\n************************************************\n");
@@ -51,7 +51,7 @@ void test_dbLL_search(dbLL_t *test_ll){
     printf("*** testing SEARCH on the doubly linked list ***\n");
     printf("************************************************\n");
     uint8_t key, val;
-    uint8_t *res, *exp_val;
+    uint8_t *res;
 
     //search for some values in the list
     key = 1;
@@ -78,19 +78,21 @@ void test_dbLL_search(dbLL_t *test_ll){
     printf("*** ... done testing search\n");
     printf("\n************************************************\n");
 
-};
+}
 
 void test_dbLL_remove(dbLL_t *test_ll){
     printf("\n************************************************\n");
     printf("*** testing REMOVAL on the doubly linked list ***\n");
     printf("************************************************\n");
-    uint8_t key, val;
+    uint8_t key;
+    uint8_t val;
     uint8_t res;
     rep_list(test_ll);
 
     //remove a middle value
     key = 89;
     val = 23;
+    assert(val + 1 > 0); // use val to pass compiler warnings
     res = remove_key(test_ll, &key);
     assert(res == 1);
     rep_list(test_ll);
@@ -130,7 +132,7 @@ void test_dbLL_remove(dbLL_t *test_ll){
     rep_list(test_ll);
     printf("*** ... done testing removal\n");
     printf("************************************************\n");
-};
+}
 
 int main(int argc, char *argv[]) 
 {
@@ -141,4 +143,4 @@ int main(int argc, char *argv[])
     test_dbLL_remove(test_ll);
 
     return 0;
-};
+}
