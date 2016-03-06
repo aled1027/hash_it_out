@@ -7,7 +7,7 @@
 
 #include "cache.h"
 
-const bool debug = true;
+const bool debug = false;
 
 uint64_t modified_jenkins(ckey_t key)
 {
@@ -20,7 +20,6 @@ uint64_t modified_jenkins(ckey_t key)
     hash += (hash << 15);
     return (uint64_t) hash;
 }
-
 
 typedef struct
 {
@@ -100,19 +99,19 @@ void cache_set(cache_t cache, ckey_t key, cval_t val, uint32_t val_size)
         cache_delete(cache, key);
     }
 
-
     cache->is_used[hash] = true;
 
     // add the value
     hash_bucket *e = &cache->buckets[hash];
     e->size = val_size;
 
-    void *key_buf = calloc(1, sizeof(*key));
-    memcpy(key_buf, key, sizeof(*key));
+    // TODO abstract this out
+    void *key_buf = calloc(strlen((const char*) key) + 1, sizeof(uint8_t));
+    strcpy(key_buf, (const char*) key);
     e->key = key_buf;
 
-    void *val_buf = calloc(1, val_size); // to retain constness of e->val
-    memcpy(val_buf, val, val_size);
+    void *val_buf = calloc(val_size, sizeof(uint8_t)); // to retain constness of e->val
+    memcpy(val_buf, val, val_size*sizeof(uint8_t));
     e->val = val_buf;
 }
 
@@ -122,31 +121,33 @@ cval_t cache_get(cache_t cache, ckey_t key, uint32_t *val_size)
     uint64_t hash = cache_hash(cache, key);
 
     if (debug) {
+        printf("in cache_get\n");
         printf("getting key = %" PRIu8 "\n", *key);
         printf("hash = %" PRIu64 "\n\n", hash);
     }
 
     if (cache->is_used[hash]) {
         hash_bucket *e = &cache->buckets[hash];
-        if (*e->key == *key) {
-            ret = calloc(1, e->size);
-            memcpy(ret, e->val, e->size);
+        if (strcmp((const char*) e->key, (const char*) key) == 0) {
+            ret = calloc(e->size, sizeof(uint8_t));
+            assert(ret && "did we get memory?");
+            memcpy(ret, e->val, e->size * sizeof(uint8_t));
             *val_size = e->size;
         } else {
-            // COLLISION TODO
+            printf("collision!\n");
         }
-
     } else {
         ret = NULL;
     }
     return ret;
 }
 
+
 void cache_delete(cache_t cache, ckey_t key) 
 {
     uint64_t hash = cache_hash(cache, key);
-    if (cache->is_used) {
-        --cache->num_buckets;
+    if (cache->is_used[hash]) {
+        --cache->used_buckets;
         cache->memused -= cache->buckets[hash].size;
         cache->is_used[hash] = false;
         free((void *) cache->buckets[hash].val); 
@@ -166,15 +167,27 @@ uint64_t cache_space_used(cache_t cache)
 void destroy_cache(cache_t cache)
 {
     for (uint64_t i = 0; i < cache->num_buckets; i++) {
-        uint64_t hash = cache_hash(cache, (ckey_t) &i);
-        cache_delete(cache, (ckey_t) &i);
+        uint64_t hash = i;
+        // TODO fix this. repeated code from cache_delete
+        // but we do *not* want to *hash* the index first
+        if (cache->is_used[hash]) {
+            --cache->used_buckets;
+            cache->memused -= cache->buckets[hash].size;
+            cache->is_used[hash] = false;
+            free((void *) cache->buckets[hash].val); 
+            free((void *) cache->buckets[hash].key);
+            cache->buckets[hash].val = NULL;
+            cache->buckets[hash].key = NULL;
+            cache->buckets[hash].size = 0;
+        }
     }
+    assert(cache->used_buckets == 0);
+    assert(cache->memused == 0);
 
     free(cache->buckets);
     free(cache->is_used);
     cache->buckets = NULL;
     cache->is_used = NULL;
-
     free(cache);
     cache = NULL;
 } 

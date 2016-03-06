@@ -16,6 +16,7 @@ cache_t create_cache(uint64_t maxmem, hash_func h);
 // If key already exists, it will overwrite the old value.
 // If maxmem capacity is exceeded, sufficient values will be removed
 // from the cache to accomodate the new value.
+// val_size is the number bytes val requires
 void cache_set(cache_t cache, ckey_t key, cval_t val, uint32_t val_size);
 
 // Retrieve the value associated with key in the cache, or NULL if not found.

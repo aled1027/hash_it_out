@@ -1,6 +1,6 @@
 
-#CFLAGS = -g -O0 -Wall -Wextra -pedantic -Werror -std=gnu11
-CFLAGS = -g -O0 -std=gnu11
+CFLAGS = -g -O0 -Wall -Wextra -pedantic -Werror -std=gnu11
+#CFLAGS = -g -O0 -std=gnu11
 LIBS = 
 
 default:
