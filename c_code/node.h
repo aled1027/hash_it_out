@@ -3,10 +3,10 @@
  * @ifjorissen, @aled1027
  * 3.4.16
  *
-*/
+ */
 
-#ifndef _NODE_H
-#define _NODE_H
+#pragma once
+
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
@@ -18,13 +18,13 @@ typedef const void *cval_t;
 
 typedef struct _node_t node_t;
 struct _node_t
- {
-   ckey_t key;
-   cval_t val;
-   uint32_t val_size;
-   node_t *next;
-   node_t *prev;
- };
+{
+    ckey_t key;
+    cval_t val;
+    uint32_t val_size;
+    node_t *next;
+    node_t *prev;
+};
 
 // Node is specifically designed for (1) usage in a double linked list
 // and (2) for holding a key-value pair. 
@@ -38,5 +38,3 @@ void set_prev(node_t *node, node_t *prev);
 
 //represent the node (print it)
 void rep_node(node_t *node); 
-
-#endif

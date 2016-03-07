@@ -3,16 +3,16 @@
  * @ifjorissen, @aled1027
  * 3.4.16
  *
-*/
+ */
 #pragma once
 
 #include "node.h"
 
 typedef struct _dbLL_t dbLL_t;
 struct _dbLL_t{
-  node_t *head;
-  node_t *tail;
-  uint32_t size;
+    node_t *head;
+    node_t *tail;
+    uint32_t size;
 };
 
 dbLL_t *new_list();
