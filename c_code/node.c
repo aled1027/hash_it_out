@@ -4,6 +4,8 @@
  * 3.4.16
  *
  */
+#include <stdio.h>
+#include <stdint.h>
 #include "node.h"
 
 /*
@@ -44,7 +46,22 @@ void set_prev(node_t *node, node_t *prev_node)
     node->prev = prev_node;
 }
 
+static void print_key(ckey_t key)
+{
+    uint32_t i = 0;
+    while (key[i]) {
+        //printf("%" PRIu32 " ", key[i]);
+        ++i;
+    }
+}
 void rep_node(node_t *node)
 {
+    // TODO - only printing first part
+    //print_key(node->key);
     printf("key: %d; value: %d\n", *node->key, *(uint8_t *)node->val);
+}
+
+ckey_t get_key(node_t *node)
+{
+    return node->key;
 }

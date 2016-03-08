@@ -11,6 +11,15 @@
 // someone used this fancy command line argument stuff
 // in a project I was working on, and I wanted to try it out
 
+static void print_key(ckey_t key)
+{
+    uint32_t i = 0;
+    while (key[i]) {
+        printf("%" PRIu32 ", ", key[i]);
+        ++i;
+    }
+    printf("\n");
+}
 
 struct args {
     bool cache_tests;
@@ -29,17 +38,6 @@ static void args_init(struct args * args)
     args->dbll_tests = false;
 }
 
-
-static void print_key(ckey_t key)
-{
-    uint32_t i = 0;
-    while (key[i]) {
-        printf("%" PRIu32 ", ", key[i]);
-        ++i;
-    }
-    printf("\n");
-}
-
 static void test_mem_overflow()
 {
     cache_t c = create_cache(10, NULL);
@@ -55,14 +53,13 @@ static void test_mem_overflow()
     destroy_cache(c);
 }
 
-
 static void test_set_get()
 {
     // TEST doesn't account for evictions!
     cache_t c = create_cache(65536, NULL);
     assert(cache_space_used(c) == 0);
 
-    uint32_t nsets = rand() % 50;
+    uint32_t nsets = rand() % 150;
     uint8_t **saved_keys = calloc(nsets, sizeof(uint8_t*));
     uint8_t *saved_vals = calloc(nsets, sizeof(uint8_t));
 
@@ -74,9 +71,10 @@ static void test_set_get()
         }
         saved_keys[i][key_size - 1] = '\0';
         saved_vals[i] = rand() % 255;
-        uint32_t m = 1;
-        cache_set(c, saved_keys[i], &saved_vals[i], m);
+        cache_set(c, saved_keys[i], &saved_vals[i], 1);
     }
+    
+
 
     for (uint32_t i = 0; i < nsets; i++) {
         uint32_t size;
@@ -102,6 +100,7 @@ static void test_collision()
 {
     // TODO write this someway where they don't use the same key
     // need access to the hash function
+    // one idea is to set the hash function to be the zero function, or identity function
     cache_t c = create_cache(100, NULL);
     assert(cache_space_used(c) == 0);
     uint8_t key = 10;
@@ -133,8 +132,8 @@ static void test_space()
 
 static void cache_tests()
 {
-    test_mem_overflow();
     test_set_get();
+    test_mem_overflow();
     test_collision();
     test_space();
 }
@@ -174,3 +173,5 @@ int main(int argc, char *argv[])
     }
     return go(&args);
 }
+
+

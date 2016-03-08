@@ -24,7 +24,7 @@ run_all:
 	./a.out --cache-tests --dbll-tests
 
 gdb:
-	gdb --args ./a.out --cache-tests --dbll-tests
+	gdb --args ./a.out --cache-tests
 
 valg:
 	valgrind --leak-check=full ./a.out --cache-tests

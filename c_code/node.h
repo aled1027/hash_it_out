@@ -38,3 +38,5 @@ void set_prev(node_t *node, node_t *prev);
 
 //represent the node (print it)
 void rep_node(node_t *node); 
+
+ckey_t get_key(node_t *node);

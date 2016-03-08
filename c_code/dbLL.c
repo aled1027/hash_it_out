@@ -37,17 +37,18 @@ void ll_insert(dbLL_t *list, ckey_t key, cval_t val, uint32_t val_size){
     list->size += 1;
 }
 
-cval_t ll_search(dbLL_t *list, ckey_t key, uint32_t *val_size){
+cval_t ll_search(dbLL_t *list, ckey_t key, uint32_t *val_size)
+{
     void *ret_val = NULL;
     node_t *cur = list->head;
     while(cur != NULL){
-        if(strcmp((const char*) cur->key, (const char*) key) == 0){
+        if (strcmp((const char*) cur->key, (const char*) key) == 0) {
             ret_val = calloc(1, cur->val_size);
             memcpy(ret_val, cur->val, cur->val_size);
             *val_size = cur->val_size;
+            //printf("returning real value\n");
             return ret_val;
-        }
-        else{
+        } else {
             cur = cur->next;
         }
     }
@@ -112,7 +113,7 @@ void destroy_list(dbLL_t *list){
 void rep_list(dbLL_t *list){
     printf("linked list: \n\tsize: %d\n", list->size);
     node_t *cur = list->head;
-    while(cur != NULL){
+    while(cur != NULL) {
         printf("\t");
         rep_node(cur);
         cur = cur->next;
@@ -120,3 +121,20 @@ void rep_list(dbLL_t *list){
     printf("...done printing list\n\n");
 }
 
+ckey_t *ll_get_keys(dbLL_t *list)
+{
+    ckey_t *ret_keys = calloc(list->size, sizeof(ckey_t));
+    node_t *cur = list->head;
+    uint32_t i = 0;
+    while (cur != NULL) {
+        ret_keys[i] = cur->key;
+        cur = cur->next;
+        ++i;
+    }
+    return ret_keys;
+}
+
+uint32_t ll_size(dbLL_t *list) 
+{
+    return list->size;
+}
