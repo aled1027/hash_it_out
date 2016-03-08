@@ -13,7 +13,7 @@
 // someone used this fancy command line argument stuff
 // in a project I was working on, and I wanted to try it out
 
-static void print_key(ckey_t key)
+static void print_key(key_type key)
 {
     uint32_t i = 0;
     while (key[i]) {
@@ -78,7 +78,7 @@ static void test_evict_object()
 
 static void test_mem_overflow()
 {
-    cache_t c = create_cache(10, NULL);
+    cache_t c = create_cache(10);
     assert(cache_space_used(c) == 0);
     uint8_t key[2];
 
@@ -98,7 +98,7 @@ static void test_mem_overflow()
 static void test_set_get()
 {
     // TEST doesn't account for evictions!
-    cache_t c = create_cache(65536, NULL);
+    cache_t c = create_cache(65536);
     assert(cache_space_used(c) == 0);
 
     //uint32_t nsets = rand() % 100;
@@ -119,7 +119,7 @@ static void test_set_get()
     
     for (uint32_t i = 0; i < nsets; i++) {
         uint32_t size;
-        cval_t v = cache_get(c, (ckey_t) saved_keys[i], &size);
+        val_type v = cache_get(c, (key_type) saved_keys[i], &size);
         if (* (uint8_t *) v != saved_vals[i]) {
             assert(false && "test failed!");
         }
@@ -142,7 +142,7 @@ static void test_collision()
     // TODO write this someway where they don't use the same key
     // need access to the hash function
     // one idea is to set the hash function to be the zero function, or identity function
-    cache_t c = create_cache(100, NULL);
+    cache_t c = create_cache(100);
     assert(cache_space_used(c) == 0);
     uint8_t key = 10;
     uint8_t val[6] = {10,11,12,13,14,15};
@@ -156,7 +156,7 @@ static void test_collision()
 
 static void test_space()
 {
-    cache_t c = create_cache(100, NULL);
+    cache_t c = create_cache(100);
     assert(cache_space_used(c) == 0);
     uint8_t key = 10;
     uint8_t val[6] = {10,11,12,13,14,15};

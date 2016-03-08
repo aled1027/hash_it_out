@@ -63,7 +63,7 @@ void test_dbLL_search(dbLL_t *test_ll)
     //search for some values in the list
     key = 1;
     val = 99;
-    res = (uint8_t *) ll_search(test_ll, &key, &val_size);
+    res = (uint8_t *)ll_search(test_ll, &key, &val_size);
     assert(*res == val);
 
     key = 89;
@@ -78,13 +78,12 @@ void test_dbLL_search(dbLL_t *test_ll)
 
     //(try to) search for some value not in the list 
     key = 10;
-    const char *invalid = "invalid key";
     res = (uint8_t *)ll_search(test_ll, &key, &val_size);
-    assert(strcmp(invalid, (char *)res) == 0);
+    assert(res == NULL);
 
     rep_list(test_ll);
     printf("*** ... done testing search\n");
-    printf("\n************************************************\n");
+    printf("************************************************\n");
 
     // TODO free memory 
 }
