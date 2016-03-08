@@ -56,6 +56,7 @@ void evict_get(evict_t evict, key_type key)
                 strcmp((char*) evict->queue[i], (char*) key) == 0) {
             // check for resizing queue
             if (evict->rear + 1 == evict->max_queue_size) {
+                // double the size of the queue!
                 evict->queue = realloc(evict->queue, 2 * evict->max_queue_size * sizeof(key_type));
                 for (uint32_t j = evict->max_queue_size; j < 2 * evict->max_queue_size; ++j) {
                     evict->queue[j] = NULL;
@@ -74,6 +75,7 @@ void evict_get(evict_t evict, key_type key)
     }
     if (failed) {
         fprintf(stderr, "key not found\n");
+        assert(false);
     }
 }
 
@@ -91,6 +93,7 @@ void evict_delete(evict_t evict, key_type key)
         }
     }
     if (failed) {
+        assert(false);
         fprintf(stderr, "key not found in eviction key\n");
     }
 }
@@ -110,10 +113,9 @@ key_type evict_select_for_removal(evict_t evict)
 {
     while (evict->front < evict->rear) {
         if (evict->queue[evict->front]) {
-            key_type k = evict->queue[evict->front];
-            evict->queue[evict->front] = NULL;
-            ++evict->front;
-            return k;
+            key_type ret_key = calloc(strlen((const char*) evict->queue[evict->front]) + 1, sizeof(uint8_t));
+            strcpy((char*) ret_key, (char*) evict->queue[evict->front]);
+            return ret_key;
         }
         ++evict->front;
     }

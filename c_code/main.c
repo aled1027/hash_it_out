@@ -68,6 +68,8 @@ static void test_evict_object()
     assert(k && strcmp((const char*) k, (const char*) b) == 0 && "didn't retrieve correct key");
     free((uint8_t*) k);
 
+    evict_delete(evict, b);
+
     k = evict_select_for_removal(evict);
     assert(k && strcmp((const char*) k, (const char*) c) == 0 && "didn't retrieve correct key");
     free((uint8_t*) k);
@@ -101,8 +103,7 @@ static void test_set_get()
     cache_t c = create_cache(65536);
     assert(cache_space_used(c) == 0);
 
-    //uint32_t nsets = rand() % 100;
-    uint32_t nsets = 50;
+    uint32_t nsets = rand() % 200;
     uint8_t **saved_keys = calloc(nsets, sizeof(uint8_t*));
     uint8_t *saved_vals = calloc(nsets, sizeof(uint8_t));
 

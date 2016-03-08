@@ -132,8 +132,12 @@ void cache_set(cache_t cache, key_type key, val_type val, uint32_t val_size)
 
     // check memory
     cache->memused += val_size;
-    if (cache->memused > cache->maxmem) {
-        // TODO free up memory via an eviction
+    while (cache->memused > cache->maxmem) {
+        // we need to evict something. 
+        // get a ke to evict
+        key_type k = evict_select_for_removal(cache->evict);
+        cache_delete(cache, k);
+        free((uint8_t*) k);
     }
     uint64_t hash = cache_hash(cache, key);
 

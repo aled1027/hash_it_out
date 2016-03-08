@@ -28,10 +28,5 @@ void evict_destroy(evict_t evict);
 
 // selects the most desirable for key removal and returns it
 // user of evict_select_for_removal is responsible for freeing the memory
+// does not actually remove the key from the eviction object
 key_type evict_select_for_removal(evict_t evict);
-    
-
-
-
-
-
