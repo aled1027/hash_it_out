@@ -100,6 +100,7 @@ static void test_mem_overflow()
 static void test_set_get()
 {
     // TEST doesn't account for evictions!
+    // ... so make sure you create the cache with enough memory
     cache_t c = create_cache(65536);
     assert(cache_space_used(c) == 0);
 
