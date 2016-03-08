@@ -10,14 +10,14 @@
 
 /*
 Node:
-ckey_t: key 
-cval_t: val
+key_type: key 
+val_type: val
 uint32_t: size
 node: next_node
 node: prev_node
 */
 
-node_t *new_node(ckey_t key, cval_t val, uint32_t val_size)
+node_t *new_node(key_type key, val_type val, uint32_t val_size)
 {
     node_t *node = (node_t *)calloc(1, sizeof(node_t));
 
@@ -46,7 +46,7 @@ void set_prev(node_t *node, node_t *prev_node)
     node->prev = prev_node;
 }
 
-static void print_key(ckey_t key)
+static void print_key(key_type key)
 {
     uint32_t i = 0;
     while (key[i]) {
@@ -61,7 +61,7 @@ void rep_node(node_t *node)
     printf("key: %d; value: %d\n", *node->key, *(uint8_t *)node->val);
 }
 
-ckey_t get_key(node_t *node)
+key_type get_key(node_t *node)
 {
     return node->key;
 }

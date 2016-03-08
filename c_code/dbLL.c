@@ -20,7 +20,7 @@ dbLL_t *new_list(){
     return list;
 }
 
-void ll_insert(dbLL_t *list, ckey_t key, cval_t val, uint32_t val_size){
+void ll_insert(dbLL_t *list, key_type key, val_type val, uint32_t val_size){
     node_t *node = new_node(key, val, val_size);
 
     if ((list->size) == 0){
@@ -37,7 +37,7 @@ void ll_insert(dbLL_t *list, ckey_t key, cval_t val, uint32_t val_size){
     list->size += 1;
 }
 
-cval_t ll_search(dbLL_t *list, ckey_t key, uint32_t *val_size)
+val_type ll_search(dbLL_t *list, key_type key, uint32_t *val_size)
 {
     void *ret_val = NULL;
     node_t *cur = list->head;
@@ -56,7 +56,7 @@ cval_t ll_search(dbLL_t *list, ckey_t key, uint32_t *val_size)
     return ret_val;
 }
 
-uint32_t ll_remove_key(dbLL_t *list, ckey_t key){
+uint32_t ll_remove_key(dbLL_t *list, key_type key){
     node_t *cur = list->head;
     uint32_t val_size = 0;
     while((cur != NULL) &&(val_size == 0)){
@@ -92,9 +92,9 @@ uint32_t ll_remove_key(dbLL_t *list, ckey_t key){
             cur = cur->next;
         }
     }
-    if(!val_size){
+    // if(!val_size){
         //printf("Sorry, there wasn't anything with key: %d to remove.\n", *key);
-    }
+    // }
     return val_size;
 }
 
@@ -121,9 +121,9 @@ void rep_list(dbLL_t *list){
     printf("...done printing list\n\n");
 }
 
-ckey_t *ll_get_keys(dbLL_t *list)
+key_type *ll_get_keys(dbLL_t *list)
 {
-    ckey_t *ret_keys = calloc(list->size, sizeof(ckey_t));
+    key_type *ret_keys = calloc(list->size, sizeof(key_type));
     node_t *cur = list->head;
     uint32_t i = 0;
     while (cur != NULL) {
