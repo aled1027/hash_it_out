@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -7,6 +8,7 @@
 
 #include "dbLL_tests.h"
 #include "cache.h"
+#include "evict.h"
 
 // someone used this fancy command line argument stuff
 // in a project I was working on, and I wanted to try it out
@@ -38,17 +40,57 @@ static void args_init(struct args * args)
     args->dbll_tests = false;
 }
 
+static void test_evict_object()
+{
+    printf("Running evict test\n");
+    evict_t evict = evict_create(10);
+
+    uint8_t a[2];
+    a[0] = 'a';
+    a[1] = '\0';
+
+    uint8_t b[2];
+    b[0] = 'b';
+    b[1] = '\0';
+
+    uint8_t c[2];
+    c[0] = 'c';
+    c[1] = '\0';
+
+    evict_set(evict, a);
+    evict_get(evict, a);
+    evict_set(evict, b);
+    evict_set(evict, c);
+    evict_delete(evict, a);
+    evict_set(evict, c);
+
+    key_type k = evict_select_for_removal(evict);
+    assert(k && strcmp((const char*) k, (const char*) b) == 0 && "didn't retrieve correct key");
+    free((uint8_t*) k);
+
+    k = evict_select_for_removal(evict);
+    assert(k && strcmp((const char*) k, (const char*) c) == 0 && "didn't retrieve correct key");
+    free((uint8_t*) k);
+
+    evict_destroy(evict);
+    free(evict);
+}
+
 static void test_mem_overflow()
 {
     cache_t c = create_cache(10, NULL);
     assert(cache_space_used(c) == 0);
-    uint8_t key = 10;
-    uint8_t val[6] = {10,11,12,13,14,15};
-    cache_set(c, &key, val, 6);
+    uint8_t key[2];
 
-    key = 11;
+    key[0] = 'a';
+    key[1] = '\0';
+
+    uint8_t val[6] = {10,11,12,13,14,15};
+    cache_set(c, key, val, 6);
+
+    key[0] = 'b';
     uint8_t val2[6] = {20,21,22,23,24,25};
-    cache_set(c, &key, val2, 6);
+    cache_set(c, key, val2, 6);
 
     destroy_cache(c);
 }
@@ -59,7 +101,8 @@ static void test_set_get()
     cache_t c = create_cache(65536, NULL);
     assert(cache_space_used(c) == 0);
 
-    uint32_t nsets = rand() % 150;
+    //uint32_t nsets = rand() % 100;
+    uint32_t nsets = 50;
     uint8_t **saved_keys = calloc(nsets, sizeof(uint8_t*));
     uint8_t *saved_vals = calloc(nsets, sizeof(uint8_t));
 
@@ -74,8 +117,6 @@ static void test_set_get()
         cache_set(c, saved_keys[i], &saved_vals[i], 1);
     }
     
-
-
     for (uint32_t i = 0; i < nsets; i++) {
         uint32_t size;
         cval_t v = cache_get(c, (ckey_t) saved_keys[i], &size);
@@ -136,6 +177,7 @@ static void cache_tests()
     test_mem_overflow();
     test_collision();
     test_space();
+    test_evict_object();
 }
 
 static int go(struct args *args)

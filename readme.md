@@ -10,3 +10,5 @@ A look-aside cache is a key-value storage for items that are difficult or slow t
   - mention asymptotics, collisions, etc.
 - eviction policy
     - evict.c and evict.h files
+- change some of the keys in the test functions
+    - they are just the addresses of uin8_t values, as opposed to "strings"

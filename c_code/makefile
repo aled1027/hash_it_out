@@ -27,4 +27,4 @@ gdb:
 	gdb --args ./a.out --cache-tests
 
 valg:
-	valgrind --leak-check=full ./a.out --cache-tests
+	valgrind --track-origins=yes --leak-check=full ./a.out --cache-tests

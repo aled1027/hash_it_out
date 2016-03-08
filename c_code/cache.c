@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "evict.h"
 #include "dbLL.h"
 #include "cache.h"
 
@@ -48,6 +49,7 @@ struct cache_obj
     hash_bucket **buckets; // hash_bucket is a misnomer? actually dbll_of_hbs?
     bool *is_used; // TODO not sure if being used anymore
     hash_func hash; // should only be accessed via cache_hash
+    evict_t evict;
 
     // buckets[i] = pointer to double linked list
     // each node in double linked list is a hash-bucket
@@ -123,6 +125,7 @@ cache_t create_cache(uint64_t maxmem, hash_func h)
     c->is_used = calloc(c->num_buckets, sizeof(bool));
     assert(c->is_used);
     c->hash = (h) ? h : modified_jenkins;
+    c->evict = evict_create(c->num_buckets);
     return c;
 }
 
@@ -153,6 +156,7 @@ void cache_set(cache_t cache, ckey_t key, cval_t val, uint32_t val_size)
     // get the bucket the key belongs in, and insert it into the bucket's linked list
     hash_bucket *e = cache->buckets[hash];
     ll_insert(e, key, val, val_size);
+    evict_set(cache->evict, key);
 }
 
 cval_t cache_get(cache_t cache, ckey_t key, uint32_t *val_size)
@@ -166,6 +170,7 @@ cval_t cache_get(cache_t cache, ckey_t key, uint32_t *val_size)
 
     hash_bucket *e = cache->buckets[hash];
     void *res = (void *) ll_search(e, key, val_size);
+    evict_get(cache->evict, key);
     return res;
 }
 
@@ -176,6 +181,7 @@ void cache_delete(cache_t cache, ckey_t key)
     hash_bucket *e = cache->buckets[hash];
     val_size = ll_remove_key(e, key);
     cache->memused -= val_size;
+    evict_delete(cache->evict, key);
 
     if (e->size == 0) {
         cache->is_used[hash] = false; 
@@ -193,6 +199,9 @@ void destroy_cache(cache_t cache)
     for (uint64_t i = 0; i < cache->num_buckets; i++) {
         destroy_list(cache->buckets[i]);
     }
+
+    evict_destroy(cache->evict);
+    free(cache->evict);
 
     free(cache->buckets);
     free(cache->is_used);
