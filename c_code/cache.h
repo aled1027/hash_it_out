@@ -33,3 +33,5 @@ uint64_t cache_space_used(cache_t cache);
 
 // Destroy all resource connected to a cache object
 void destroy_cache(cache_t cache);
+
+void print_cache(cache_t cache);

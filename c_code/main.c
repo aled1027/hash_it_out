@@ -10,35 +10,6 @@
 
 // someone used this fancy command line argument stuff
 // in a project I was working on, and I wanted to try it out
-struct args {
-    bool cache_tests;
-    bool dbll_tests;
- };
-
-static void args_init(struct args * args)
-{
-    args->cache_tests = false;
-    args->dbll_tests = false;
-}
-
-static struct option opts[] =
-{
-    {"cache-tests", no_argument, 0, 'c'},
-    {"dbll-tests", no_argument, 0, 'd'},
-};
-
-static void test_mem_overflow()
-{
-    cache_t c = create_cache(10, NULL);
-    assert(cache_space_used(c) == 0);
-    uint8_t key = 10;
-    uint8_t val[6] = {10,11,12,13,14,15};
-    cache_set(c, &key, &val, 6);
-
-    uint8_t key2 = 11;
-    uint8_t val2[6] = {20,21,22,23,24,25};
-    cache_set(c, &key2, &val2, 6);
-}
 
 static void print_key(ckey_t key)
 {
@@ -50,30 +21,60 @@ static void print_key(ckey_t key)
     printf("\n");
 }
 
+struct args {
+    bool cache_tests;
+    bool dbll_tests;
+};
+
+static struct option opts[] =
+{
+    {"cache-tests", no_argument, 0, 'c'},
+    {"dbll-tests", no_argument, 0, 'd'},
+};
+
+static void args_init(struct args * args)
+{
+    args->cache_tests = false;
+    args->dbll_tests = false;
+}
+
+static void test_mem_overflow()
+{
+    cache_t c = create_cache(10, NULL);
+    assert(cache_space_used(c) == 0);
+    uint8_t key = 10;
+    uint8_t val[6] = {10,11,12,13,14,15};
+    cache_set(c, &key, val, 6);
+
+    key = 11;
+    uint8_t val2[6] = {20,21,22,23,24,25};
+    cache_set(c, &key, val2, 6);
+
+    destroy_cache(c);
+}
+
 static void test_set_get()
 {
     // TEST doesn't account for evictions!
     cache_t c = create_cache(65536, NULL);
     assert(cache_space_used(c) == 0);
 
-    //uint32_t nsets = rand() % 35;
-    uint32_t nsets = 35;
-
+    uint32_t nsets = rand() % 150;
     uint8_t **saved_keys = calloc(nsets, sizeof(uint8_t*));
     uint8_t *saved_vals = calloc(nsets, sizeof(uint8_t));
 
     for (uint32_t i = 0; i < nsets; i++) {
-        //uint32_t key_size = (rand() % 10) + 2;
-        uint32_t key_size = 10;
+        uint32_t key_size = (rand() % 10) + 2;
         saved_keys[i] = calloc(key_size, sizeof(uint8_t));
         for (uint32_t j = 0; j < key_size - 1; j++) {
             saved_keys[i][j] = rand() % 255;
         }
         saved_keys[i][key_size - 1] = '\0';
         saved_vals[i] = rand() % 255;
-        uint32_t m = 1;
-        cache_set(c, saved_keys[i], &saved_vals[i], m);
+        cache_set(c, saved_keys[i], &saved_vals[i], 1);
     }
+    
+
 
     for (uint32_t i = 0; i < nsets; i++) {
         uint32_t size;
@@ -99,15 +100,17 @@ static void test_collision()
 {
     // TODO write this someway where they don't use the same key
     // need access to the hash function
+    // one idea is to set the hash function to be the zero function, or identity function
     cache_t c = create_cache(100, NULL);
     assert(cache_space_used(c) == 0);
     uint8_t key = 10;
     uint8_t val[6] = {10,11,12,13,14,15};
-    cache_set(c, &key, &val, 6);
+    cache_set(c, &key, val, 6);
 
-    uint8_t key2 = 10;
     uint8_t val2[4] = {20,21,22,23};
-    cache_set(c, &key2, &val2, 4);
+    cache_set(c, &key, val2, 4);
+
+    destroy_cache(c);
 }
 
 static void test_space()
@@ -116,19 +119,21 @@ static void test_space()
     assert(cache_space_used(c) == 0);
     uint8_t key = 10;
     uint8_t val[6] = {10,11,12,13,14,15};
-    cache_set(c, &key, &val, 6);
+    cache_set(c, &key, val, 6);
 
-    uint8_t key2 = 11;
+    key = 11;
     uint8_t val2[4] = {20,21,22,23};
-    cache_set(c, &key2, &val2, 4);
+    cache_set(c, &key, val2, 4);
 
     assert(10 == cache_space_used(c));
+
+    destroy_cache(c);
 }
 
 static void cache_tests()
 {
-    test_mem_overflow();
     test_set_get();
+    test_mem_overflow();
     test_collision();
     test_space();
 }
@@ -151,10 +156,8 @@ int main(int argc, char *argv[])
 {
     srand(time(NULL));
     assert(argc && argv);
-
     struct args args;
     args_init(&args);
-
     int c, idx;
     while ((c = getopt_long(argc, argv, "", opts, &idx)) != -1) {
         switch(c) {
@@ -170,3 +173,5 @@ int main(int argc, char *argv[])
     }
     return go(&args);
 }
+
+

@@ -8,7 +8,8 @@
 
 
 
-dbLL_t *test_dbLL_creation(){
+dbLL_t *test_dbLL_creation()
+{
     printf("\n************************************************\n");
     printf("*** testing CREATION of doubly linked list ***\n");
     printf("************************************************\n");
@@ -18,7 +19,8 @@ dbLL_t *test_dbLL_creation(){
     return test_ll;
 }
 
-void test_dbLL_insert(dbLL_t *test_ll){
+void test_dbLL_insert(dbLL_t *test_ll)
+{
     printf("\n************************************************\n");
     printf("*** testing INSERTION on the doubly linked list ***\n");
     printf("************************************************\n");
@@ -49,7 +51,8 @@ void test_dbLL_insert(dbLL_t *test_ll){
     printf("************************************************\n");
 }
 
-void test_dbLL_search(dbLL_t *test_ll){
+void test_dbLL_search(dbLL_t *test_ll)
+{
     printf("\n************************************************\n");
     printf("*** testing SEARCH on the doubly linked list ***\n");
     printf("************************************************\n");
@@ -85,7 +88,8 @@ void test_dbLL_search(dbLL_t *test_ll){
     // TODO free memory 
 }
 
-void test_dbLL_remove(dbLL_t *test_ll){
+void test_dbLL_remove(dbLL_t *test_ll)
+{
     printf("\n************************************************\n");
     printf("*** testing REMOVAL on the doubly linked list ***\n");
     printf("************************************************\n");

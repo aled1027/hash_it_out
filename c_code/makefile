@@ -14,22 +14,17 @@ main: $(OBJECTS)
 $(OBJECTS): ./%.o : ./%.c
 	$(CC) -c $< -o $@ $(CFLAGS)
 
-#default:
-#	gcc $(CFLAGS) cache.c main.c  $(LIBS)
-#
-#test_dbLL:
-#	gcc $(CFLAGS) linked_list/node.c linked_list/dbLL.c linked_list/dbLL_tests.c  -o linked_list/dbll.o
-#
-#test_cache_collision: cache_collision_tests.c cache_collision.c linked_list/dbLL.c linked_list/node.c
-#	gcc $(CFLAGS) cache_collision_tests.c cache_collision.c linked_list/dbLL.c linked_list/node.c -o cache_collision.o
-#
 clean:
 	rm *.o; rm a.out
+
 run:
+	./a.out --cache-tests
+
+run_all:
 	./a.out --cache-tests --dbll-tests
-#
+
 gdb:
-	gdb --args ./a.out --cache-tests --dbll-tests
+	gdb --args ./a.out --cache-tests
 
 valg:
-	valgrind --leak-check=full ./a.out
+	valgrind --leak-check=full ./a.out --cache-tests

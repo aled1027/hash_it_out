@@ -3,16 +3,16 @@
  * @ifjorissen, @aled1027
  * 3.4.16
  *
-*/
+ */
 #pragma once
 
 #include "node.h"
 
 typedef struct _dbLL_t dbLL_t;
 struct _dbLL_t{
-  node_t *head;
-  node_t *tail;
-  uint32_t size;
+    node_t *head;
+    node_t *tail;
+    uint32_t size;
 };
 
 dbLL_t *new_list();
@@ -31,3 +31,10 @@ cval_t ll_search(dbLL_t *list, ckey_t key, uint32_t *val_size);
 void rep_list(dbLL_t *list);
 
 void destroy_list(dbLL_t *list);
+
+// returns an array of all keys
+// can access size of array via list->size
+ckey_t *ll_get_keys(dbLL_t *list);
+
+uint32_t ll_size(dbLL_t *list);
+
