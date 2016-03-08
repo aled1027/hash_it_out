@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "evict.h"
 #include "dbLL.h"
 #include "cache.h"
 
@@ -44,9 +45,13 @@ struct cache_obj
     uint64_t num_buckets;
     uint64_t memused;
     uint64_t maxmem;
+    uint64_t num_elements;
     hash_bucket **buckets; // so buckets[i] = pointer to double linked list
     hash_func hash; // should only be accessed via cache_hash
-    uint64_t num_elements;
+    evict_t evict;
+
+    // buckets[i] = pointer to double linked list
+    // each node in double linked list is a hash-bucket
 };
 
 static uint64_t cache_hash(cache_t cache, key_type key) 
@@ -107,7 +112,9 @@ cache_t create_cache(uint64_t maxmem)
     for (uint32_t i = 0; i < c->num_buckets; i++){
         c->buckets[i] = new_list();
     }
+
     c->hash = modified_jenkins;
+    c->evict = evict_create(c->num_buckets);
     return c;
 }
 
@@ -133,6 +140,7 @@ void cache_set(cache_t cache, key_type key, val_type val, uint32_t val_size)
     // get the bucket the key belongs in, and insert it into the bucket's linked list
     hash_bucket *e = cache->buckets[hash];
     ll_insert(e, key, val, val_size);
+    evict_set(cache->evict, key);
     
     //increase the number of elements in the cache
     ++cache->num_elements;
@@ -149,6 +157,7 @@ val_type cache_get(cache_t cache, key_type key, uint32_t *val_size)
 
     hash_bucket *e = cache->buckets[hash];
     void *res = (void *) ll_search(e, key, val_size);
+    evict_get(cache->evict, key);
     return res;
 }
 
@@ -158,6 +167,8 @@ void cache_delete(cache_t cache, key_type key)
     uint32_t val_size;
     hash_bucket *e = cache->buckets[hash];
     val_size = ll_remove_key(e, key);
+    cache->memused -= val_size;
+    evict_delete(cache->evict, key);
 
     //there was actually an item to delete
     if (val_size != 0) {
@@ -176,6 +187,9 @@ void destroy_cache(cache_t cache)
     for (uint32_t i = 0; i < cache->num_buckets; i++) {
         destroy_list(cache->buckets[i]);
     }
+
+    evict_destroy(cache->evict);
+    free(cache->evict);
 
     free(cache->buckets);
     cache->buckets = NULL;
