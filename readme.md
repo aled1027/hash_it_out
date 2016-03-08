@@ -30,6 +30,8 @@ A look-aside cache is a key-value storage for items that are difficult or slow t
   c_code/cache.h: header file for cache; cache API 
   c_code/cache.c: implementation of cache
   c_code/dbLL_tests.c: tests for doubly linked list
+  c_code/evict.h: header file for eviction policy; eviction api
+  c_code/evict.c: implementation of eviction policy
   c_code/main.c: tests for the cache
   c_code/makefile: a simple makefile
 ```
@@ -52,8 +54,14 @@ A look-aside cache is a key-value storage for items that are difficult or slow t
     * It handles deletion more gracefully than a singly linked list. 
     * Collisions become something of a "non-issue," since we only have to insert the key into the list that each bucket in the cache has a pointer to.
     * Deletion in a hash table with chaining has fewer things to keep track of than deletion might in a hash table which leverages open addressing. This is also true of search.
-    * Unlike open addressing, where the number of elements in the cache must always be less than the number of buckets, its _possible_ to store more elements in the cache than there are number of buckets. This means that the load factor approaches 1, a cache designed with open addressing will see much faster performance degredation than a cache designed chaining as it collision resolution mechanism. Of course, this comes at the expense of (near) constant time accesses, which is the whole point of a hash table. That being said, the performance of It also meant that we wouldn't have to develop an internal probing function (which open addressing relies on). 
+    * Unlike open addressing, where the number of elements in the cache must always be less than the number of buckets, it's _possible_ to store more elements in the cache than there are number of buckets. This means that the load factor approaches 1, a cache designed with open addressing will see much faster performance degredation than a cache designed chaining as it collision resolution mechanism. Of course, this comes at the expense of (near) constant time accesses, which is the whole point of a hash table. That being said, the performance of It also meant that we wouldn't have to develop an internal probing function (which open addressing relies on). 
 
+### On eviction
+
+We implemented LRU as our eviction algorithm, but attempted to do so in a manner that was modular and abstracted, such that the eviction policy is easily changed. 
+In pursuit of this goal, we created a simple, generic eviction api with methods like `get, set, delete, destroy`.
+In the actual implementation of LRU, we use a queue datastructure implemented via an array with stored indices of the front and end of the queue.
+All eviction operations require constant time, but they are implemented naiively, so the performance may not be optimal.
 
 ### Some Notes on Testing
   We chose to implement two sets of tests. `dbLL_tests.c` contains tests for the doubly linked list, and attempts to exhaustively test insertion, removal, and search. It does not, however attempt to create "huge" lists. 
