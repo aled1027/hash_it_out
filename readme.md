@@ -52,15 +52,12 @@ A look-aside cache is a key-value storage for items that are difficult or slow t
 
   So in our code, the hash bucket is a pointer to a (unordered) doubly linked list.
 
-  We chose to use the doubly-linked list for the following reasons:
+  We chose to use the doubly-linked list for the following reasons: 
 
-    * It handles deletion more gracefully than a singly linked list.
-
-    * Collisions become something of a "non-issue," since we only have to insert the key into the list that each bucket in the cache has a pointer to.
-
-    * Deletion in a hash table with chaining has fewer things to keep track of than deletion might in a hash table which leverages open addressing. This is also true of search.
-
-    * Unlike open addressing, where the number of elements in the table must always be less than the number of buckets, it's _possible_ to store more elements in the table than there are number of buckets. Furthermore, as the load factor approaches 1, a table designed with open addressing will see much faster performance degredation than a table designed with chaining as its collision resolution mechanism. Of course, this comes at the expense of (near) constant time accesses, which is the whole point of a hash table.
+  - It handles deletion more gracefully than a singly linked list.
+  - Collisions become something of a "non-issue," since we only have to insert the key into the list that each bucket in the cache has a pointer to.
+  - Deletion in a hash table with chaining has fewer things to keep track of than deletion might in a hash table which leverages open addressing. This is also true of search.
+  - Unlike open addressing, where the number of elements in the table must always be less than the number of buckets, it's _possible_ to store more elements in the table than there are number of buckets. Furthermore, as the load factor approaches 1, a table designed with open addressing will see much faster performance degredation than a table designed with chaining as its collision resolution mechanism. Of course, this comes at the expense of (near) constant time accesses, which is the whole point of a hash table.
 
   Of course, in choosing to use a linked list for our collision resolution mechanism, we incur the overhead of the structure itself, that is to say, the pointers to next and prev nodes, as well as the cost of traversal.
 
