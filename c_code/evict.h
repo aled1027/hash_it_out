@@ -26,7 +26,7 @@ void evict_delete(evict_t evict, key_type key);
 // delete and free all memory of evict_t
 void evict_destroy(evict_t evict);
 
-// selects the most desirable for key removal and returns it
-// user of evict_select_for_removal is responsible for freeing the memory
-// does not actually remove the key from the eviction object
+// Destroy all resource connected to a cache object
+// User of evict_select_for_removal is responsible for freeing the memory
+// Does not actually remove the key from the eviction object, evict_delete must still be called
 key_type evict_select_for_removal(evict_t evict);

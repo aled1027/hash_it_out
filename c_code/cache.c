@@ -66,7 +66,7 @@ static void cache_dynamic_resize(cache_t cache)
     
     float load_factor = (float)cache->num_elements / (float)cache->num_buckets;
     if (load_factor > MAX_LOAD_FACTOR) {
-        uint64_t new_num_buckets = (uint64_t) ((float)cache->num_elements / RESET_LOAD_FACTOR);
+        uint64_t new_num_buckets = (uint64_t) ((float) cache->num_elements / RESET_LOAD_FACTOR);
 
         // new memory for new cache & initialize lists
         hash_bucket **new_buckets = calloc(new_num_buckets, sizeof(hash_bucket*)); 
@@ -127,26 +127,21 @@ void cache_set(cache_t cache, key_type key, val_type val, uint32_t val_size)
         printf("hash = %" PRIu64 "\n", hash);
         printf("value = %" PRIu8 "\n\n", *(uint8_t *)val);
     }
-     //resize if necessary
+
     cache_dynamic_resize(cache); // will resize cache if load factor is exceeded
 
-    // check memory
+    // eviction, if necessary
     cache->memused += val_size;
     while (cache->memused > cache->maxmem) {
-        // we need to evict something. 
-        // get a ke to evict
         key_type k = evict_select_for_removal(cache->evict);
         cache_delete(cache, k);
         free((uint8_t*) k);
     }
-    uint64_t hash = cache_hash(cache, key);
 
-    // get the bucket the key belongs in, and insert it into the bucket's linked list
-    hash_bucket *e = cache->buckets[hash];
-    ll_insert(e, key, val, val_size);
-    evict_set(cache->evict, key);
-    
-    //increase the number of elements in the cache
+    uint64_t hash = cache_hash(cache, key);
+    hash_bucket *e = cache->buckets[hash]; // bucket the key belongs to
+    ll_insert(e, key, val, val_size); // insert into double linked list
+    evict_set(cache->evict, key); // notify evict object that key was inserted
     ++cache->num_elements;
 }
 
@@ -171,13 +166,12 @@ void cache_delete(cache_t cache, key_type key)
     uint32_t val_size;
     hash_bucket *e = cache->buckets[hash];
     val_size = ll_remove_key(e, key);
-    cache->memused -= val_size;
-    evict_delete(cache->evict, key);
 
     //there was actually an item to delete
     if (val_size != 0) {
         --cache->num_elements;
         cache->memused -= val_size;
+        evict_delete(cache->evict, key);
     }
 }
 
@@ -194,10 +188,9 @@ void destroy_cache(cache_t cache)
 
     evict_destroy(cache->evict);
     free(cache->evict);
-
     free(cache->buckets);
+    cache->evict = NULL;
     cache->buckets = NULL;
-
     free(cache);
     cache = NULL;
 }

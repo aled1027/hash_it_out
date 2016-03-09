@@ -1,6 +1,6 @@
 #include <assert.h>
 #include <string.h>
-#include <stdio.h>
+#include <stdio.h> 
 #include <stdlib.h>
 #include <stdbool.h>
 #include <getopt.h>
@@ -9,9 +9,6 @@
 #include "dbLL_tests.h"
 #include "cache.h"
 #include "evict.h"
-
-// someone used this fancy command line argument stuff
-// in a project I was working on, and I wanted to try it out
 
 static void print_key(key_type key)
 {
@@ -42,20 +39,13 @@ static void args_init(struct args * args)
 
 static void test_evict_object()
 {
+    // test the eviction object
     printf("Running evict test\n");
     evict_t evict = evict_create(10);
 
-    uint8_t a[2];
-    a[0] = 'a';
-    a[1] = '\0';
-
-    uint8_t b[2];
-    b[0] = 'b';
-    b[1] = '\0';
-
-    uint8_t c[2];
-    c[0] = 'c';
-    c[1] = '\0';
+    uint8_t a[2] = {'a', '\0'};
+    uint8_t b[2] = {'b', '\0'};
+    uint8_t c[2] = {'c', '\0'};
 
     evict_set(evict, a);
     evict_get(evict, a);
@@ -80,13 +70,10 @@ static void test_evict_object()
 
 static void test_mem_overflow()
 {
+    // test if the cache handles memory overflow correct
     cache_t c = create_cache(10);
     assert(cache_space_used(c) == 0);
-    uint8_t key[2];
-
-    key[0] = 'a';
-    key[1] = '\0';
-
+    uint8_t key[2] = {'a', '\0'};
     uint8_t val[6] = {10,11,12,13,14,15};
     cache_set(c, key, val, 6);
 
@@ -94,19 +81,27 @@ static void test_mem_overflow()
     uint8_t val2[6] = {20,21,22,23,24,25};
     cache_set(c, key, val2, 6);
 
+    assert(6 == cache_space_used(c));
     destroy_cache(c);
 }
 
 static void test_set_get()
 {
-    // TEST doesn't account for evictions!
-    // ... so make sure you create the cache with enough memory
-    cache_t c = create_cache(65536);
-    assert(cache_space_used(c) == 0);
+    // A generic test of the cache that randomly generates keys
+    // and values, and then sets and gets them from the cache.
+    // this test doesn't take evictions into account, so make sure
+    // that the cache is created with enough memory
+    //
+    // !!! TEST MAY FAIL !!!
+    // Our code doesn't handle duplicate, nonunique keys (at the moment)
+    // so this test may fail sometimes, but it seems to be and should be rare
 
-    uint32_t nsets = rand() % 200;
-    uint8_t **saved_keys = calloc(nsets, sizeof(uint8_t*));
-    uint8_t *saved_vals = calloc(nsets, sizeof(uint8_t));
+    uint32_t nsets = rand() % 100;
+    uint8_t *saved_keys[nsets];
+    uint8_t saved_vals[nsets];
+
+    cache_t c = create_cache(nsets * 10);
+    assert(cache_space_used(c) == 0);
 
     for (uint32_t i = 0; i < nsets; i++) {
         uint32_t key_size = (rand() % 10) + 2;
@@ -115,10 +110,10 @@ static void test_set_get()
             saved_keys[i][j] = rand() % 255;
         }
         saved_keys[i][key_size - 1] = '\0';
-        saved_vals[i] = rand() % 255;
+        saved_vals[i] = rand() % 100;
         cache_set(c, saved_keys[i], &saved_vals[i], 1);
     }
-    
+
     for (uint32_t i = 0; i < nsets; i++) {
         uint32_t size;
         val_type v = cache_get(c, (key_type) saved_keys[i], &size);
@@ -133,25 +128,18 @@ static void test_set_get()
         free(saved_keys[i]);
         saved_keys[i] = NULL;
     }
-    free(saved_keys);
-    free(saved_vals);
-    saved_keys = NULL;
-    saved_vals = NULL;
 }
 
 static void test_collision()
 {
-    // TODO write this someway where they don't use the same key
-    // need access to the hash function
-    // one idea is to set the hash function to be the zero function, or identity function
     cache_t c = create_cache(100);
     assert(cache_space_used(c) == 0);
-    uint8_t key = 10;
+    uint8_t key[2] = {'a', '\0'};
     uint8_t val[6] = {10,11,12,13,14,15};
-    cache_set(c, &key, val, 6);
+    cache_set(c, key, val, 6);
 
     uint8_t val2[4] = {20,21,22,23};
-    cache_set(c, &key, val2, 4);
+    cache_set(c, key, val2, 4);
 
     destroy_cache(c);
 }
@@ -160,13 +148,13 @@ static void test_space()
 {
     cache_t c = create_cache(100);
     assert(cache_space_used(c) == 0);
-    uint8_t key = 10;
+    uint8_t key[2] = {'a', '\0'};
     uint8_t val[6] = {10,11,12,13,14,15};
-    cache_set(c, &key, val, 6);
+    cache_set(c, key, val, 6);
 
-    key = 11;
+    key[0] = 'b';
     uint8_t val2[4] = {20,21,22,23};
-    cache_set(c, &key, val2, 4);
+    cache_set(c, key, val2, 4);
 
     assert(10 == cache_space_used(c));
 
