@@ -3,7 +3,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-
 #include "evict.h"
 
 struct evict_obj
@@ -119,6 +118,7 @@ key_type evict_select_for_removal(evict_t evict)
         }
         ++evict->front;
     }
+
     fprintf(stderr, "no keys to evict\n");
     return NULL;
 }
