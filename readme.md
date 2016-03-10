@@ -5,10 +5,7 @@ Hash-it-out is a generic look-aside cache.
 A look-aside cache is a key-value storage for items that are difficult or slow to compute.
 
 ## TODO
-- `set_get` tests sometimes failing for nsets > 200
-    - always failing for nsets > 1000
-- change some of the keys in the test functions
-    - they are just the addresses of uin8_t values, as opposed to "strings"
+- None currently
 
 -------
 
@@ -64,18 +61,24 @@ A look-aside cache is a key-value storage for items that are difficult or slow t
 
 ### On eviction
 
-We implemented LRU as our eviction algorithm, but attempted to do so in a manner that was modular and abstracted, such that the eviction policy is easily changed. 
-In pursuit of this goal, we created a simple, generic eviction api with methods like `get, set, delete, destroy`.
-In the actual implementation of LRU, we use a queue datastructure implemented via an array with stored indices of the front and end of the queue.
-All eviction operations require constant time, but they are implemented naiively, so the performance may not be optimal.
+We implemented LRU as our eviction policy, and attempted to do so in a manner that was modular and abstracted, such that the eviction policy is easily changed. 
+In pursuit of this goal, we created a simple, generic eviction api with methods like `get, set, delete, destroy` (see `evict.h` for the full API).
+In the actual implementation of LRU, we use a queue data-structure implemented via an array with stored indices of the front and end of the queue.
+Most eviction operations (except `create`, `destroy` and `get`) run in constant time, but they are implemented naiively, so the performance may not be optimal. 
+`get` does not run in constant time (it is rougly linear in the number of keys stored) because the queue data-structure must be looped over to find the key.
+If it turns out that that `get` is called often and `delete` and `select_for_removal` are not, then the linear computation currently in get could be moved to `delete` and `select_for_removal`.
 
 ### On Testing
-  We chose to implement two sets of tests. `dbLL_tests.c` contains tests for the doubly linked list, and attempts to exhaustively test insertion, removal, and search. It does not, however attempt to create "huge" lists. `main.c` contains the tests for the cache, and test set/get, delete, collision resolution, eviction, and memory overflow. 
+We have three sets of tests. 
+`cache_tests.c` contains tests for the cache, `evict_tests` contains tests for the eviction, and `dbLL_tests.c` contains tests for the doubly linked list.
+Our tests are intended to cover a variety of use-cases, but due to their finite nature, do not cover all test cases. 
+In particular, most of our tests, with the major exception of the cache set/get test (a test that Alex heavily relied on), utilize fewer than 10 key-value pairs. 
+Where in practice, we imagine that much more than 10 key-value pairs are being set, accessed, and deleted.
 
 -------
 
 ### Known Issues
-  * We are relying quite heavily on the assumption that keys are unique. As of right now, we do not check to make sure that the key isn't already in the cache. To the user, it will seem as though the cache performed an "update", since the most recent key with that value will be closer to the head of the list, but because we don't (yet) remove previous <key, value> pair, we incur all of the costs of an "insertion," rather than an "update." This means that we are allocating additional memory to store this item, and also increasing load factor (unless, of course, we've triggered a resize). 
+None currently
 
 
 #####References

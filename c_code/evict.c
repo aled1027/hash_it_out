@@ -37,14 +37,19 @@ void evict_set(evict_t evict, key_type key)
         assert(evict->queue && "memory");
     }
 
+    // This is commented out because because it requires linear time and our current 
+    // cache API does not rely on it. This section of the code checks if a key is already
+    // in the queue datastructure, and if it is, sets the old version to NULL. 
+    // If this code is commented out, a key may be be prematurely evicted.
+    //
     // check if key already in queue:
-    for (uint32_t i = evict->front; i < evict->rear; ++i) {
-        if (evict->queue[i] && strcmp((char*) evict->queue[i], (char*) key) == 0) {
-            free((void*) evict->queue[i]);
-            evict->queue[i] = NULL;
-            break;
-        }
-    }
+    //for (uint32_t i = evict->front; i < evict->rear; ++i) {
+    //    if (evict->queue[i] && strcmp((char*) evict->queue[i], (char*) key) == 0) {
+    //        free((void*) evict->queue[i]);
+    //        evict->queue[i] = NULL;
+    //        break;
+    //    }
+    //}
 
     // put key on back of queue
     key_type key_copy = calloc(strlen((const char*) key) + 1, sizeof(uint8_t));
