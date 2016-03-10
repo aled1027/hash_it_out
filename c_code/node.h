@@ -11,7 +11,6 @@
 #include <string.h>
 #include <stdint.h>
 #include <stdio.h>
-// #include "../cache.h"
 
 typedef const uint8_t *key_type;
 typedef const void *val_type;

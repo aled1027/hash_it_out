@@ -71,6 +71,7 @@ static void test_evict_object()
 static void test_mem_overflow()
 {
     // test if the cache handles memory overflow correct
+    printf("Running memory overflow test\n");
     cache_t c = create_cache(10);
     assert(cache_space_used(c) == 0);
     uint8_t key[2] = {'a', '\0'};
@@ -95,7 +96,7 @@ static void test_set_get()
     // !!! TEST MAY FAIL !!!
     // Our code doesn't handle duplicate, nonunique keys (at the moment)
     // so this test may fail sometimes, but it seems to be and should be rare
-
+    printf("Running set/get test\n");
     uint32_t nsets = rand() % 100;
     uint8_t *saved_keys[nsets];
     uint8_t saved_vals[nsets];
@@ -132,6 +133,7 @@ static void test_set_get()
 
 static void test_collision()
 {
+    printf("Running collision test\n");
     cache_t c = create_cache(100);
     assert(cache_space_used(c) == 0);
     uint8_t key[2] = {'a', '\0'};
@@ -146,6 +148,7 @@ static void test_collision()
 
 static void test_space()
 {
+    printf("Running space test\n");
     cache_t c = create_cache(100);
     assert(cache_space_used(c) == 0);
     uint8_t key[2] = {'a', '\0'};

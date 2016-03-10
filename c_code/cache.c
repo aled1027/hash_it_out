@@ -121,25 +121,44 @@ cache_t create_cache(uint64_t maxmem)
 void cache_set(cache_t cache, key_type key, val_type val, uint32_t val_size)
 {
 
+    key_type k;
+
     if (debug) {
         uint64_t hash = cache_hash(cache, key);
         printf("setting key = %" PRIu8 "\n", *key);
         printf("hash = %" PRIu64 "\n", hash);
         printf("value = %" PRIu8 "\n\n", *(uint8_t *)val);
     }
-
     cache_dynamic_resize(cache); // will resize cache if load factor is exceeded
 
     // eviction, if necessary
     cache->memused += val_size;
     while (cache->memused > cache->maxmem) {
-        key_type k = evict_select_for_removal(cache->evict);
+        k = evict_select_for_removal(cache->evict);
         cache_delete(cache, k);
         free((uint8_t*) k);
     }
 
     uint64_t hash = cache_hash(cache, key);
     hash_bucket *e = cache->buckets[hash]; // bucket the key belongs to
+
+    //try to remove the key if it exists 
+    uint32_t old_val_size = ll_remove_key(e, key);
+    if (old_val_size != 0){
+        //we want to delete the old duplicate key, we also need to update the eviction queue
+        //basically, we want to do delete a key from the queue if it
+        // was a duplicate AND we haven't already removed it from the evict object
+        // as a result of k = evict_select_for_removal(cache->evict);
+        // TODO: this currently triggers an assertion error in evict.c most of the time
+        if (!(k && (strcmp((const char *)k, (const char *)key)))){
+            evict_delete(cache->evict, key);
+        }
+        --cache->num_elements;
+        cache->memused -= old_val_size;
+    }
+
+
+    //insert the key
     ll_insert(e, key, val, val_size); // insert into double linked list
     evict_set(cache->evict, key); // notify evict object that key was inserted
     ++cache->num_elements;
@@ -163,10 +182,9 @@ val_type cache_get(cache_t cache, key_type key, uint32_t *val_size)
 void cache_delete(cache_t cache, key_type key) 
 {
     uint64_t hash = cache_hash(cache, key);
-    uint32_t val_size;
+    // uint32_t val_size;
     hash_bucket *e = cache->buckets[hash];
-    val_size = ll_remove_key(e, key);
-
+    uint32_t val_size = ll_remove_key(e, key);
     //there was actually an item to delete
     if (val_size != 0) {
         --cache->num_elements;
