@@ -12,7 +12,7 @@
 #include "cache_tests.h"
 
 #define my_assert(value, string) \
-{if (!(value)) { printf("!!!! %s\n", string);}}
+{if (!(value)) { printf("!!!!FAILURE!!!!! %s\n", string);}}
 
 static void print_key(key_type key)
 {
@@ -108,7 +108,6 @@ static void test_set_get()
 
 static void test_duplicate_key()
 {
-    // TODO can remove comment: working here
     printf("Running cache duplicate key test\n");
     cache_t c = create_cache(100);
     my_assert(cache_space_used(c) == 0, "cache space is nonzero at initialization");

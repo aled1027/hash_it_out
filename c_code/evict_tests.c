@@ -12,7 +12,7 @@
 #include "evict_tests.h"
 
 #define my_assert(value, string) \
-{if (!(value)) { printf("!!!! %s\n", string);}}
+{if (!(value)) { printf("!!!FAILURE!!! %s\n", string);}}
 
 static void print_key(key_type key)
 {

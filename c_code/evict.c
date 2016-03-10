@@ -30,13 +30,20 @@ evict_t evict_create(uint32_t max_size)
 
 void evict_set(evict_t evict, key_type key) 
 {
-    // TODO dynamically resize if rear > max_queue_size
-    
     // check for resizing queue
     if (evict->rear + 1 == evict->max_queue_size) {
         evict->max_queue_size *= 2;
         evict->queue = realloc(evict->queue, evict->max_queue_size * sizeof(key_type));
         assert(evict->queue && "memory");
+    }
+
+    // check if key already in queue:
+    for (uint32_t i = evict->front; i < evict->rear; ++i) {
+        if (evict->queue[i] && strcmp((char*) evict->queue[i], (char*) key) == 0) {
+            free((void*) evict->queue[i]);
+            evict->queue[i] = NULL;
+            break;
+        }
     }
 
     // put key on back of queue

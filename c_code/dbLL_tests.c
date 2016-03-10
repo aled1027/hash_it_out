@@ -51,8 +51,6 @@ static void test_dbLL_creation()
 
 }
 
-
-
 static void test_dbLL_insert()
 {
     dbLL_t *test_ll = new_list();

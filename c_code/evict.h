@@ -13,7 +13,6 @@ typedef uint64_t (*hash_func)(key_type key);
 evict_t evict_create(uint32_t arr_size);
 
 // notifies evict obj that key has been set to cache
-// NOTE (TODO?): doesn't check that key is not already in eviction object
 void evict_set(evict_t evict, key_type key);
 
 // notifies evict obj that key has been "gotten" from cache
