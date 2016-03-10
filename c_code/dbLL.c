@@ -92,9 +92,6 @@ uint32_t ll_remove_key(dbLL_t *list, key_type key){
             cur = cur->next;
         }
     }
-    // if(!val_size){
-        //printf("Sorry, there wasn't anything with key: %d to remove.\n", *key);
-    // }
     return val_size;
 }
 
