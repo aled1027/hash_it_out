@@ -1,4 +1,4 @@
-#include <assert.h>
+//#include <assert.h>
 #include <string.h>
 #include <stdio.h> 
 #include <stdlib.h>
@@ -9,6 +9,10 @@
 #include "dbLL_tests.h"
 #include "cache.h"
 #include "evict.h"
+
+#define my_assert(value, string) \
+{if (!(value)) { printf("%s\n", string);}}
+
 
 static void print_key(key_type key)
 {
@@ -55,13 +59,13 @@ static void test_evict_object()
     evict_set(evict, c);
 
     key_type k = evict_select_for_removal(evict);
-    assert(k && strcmp((const char*) k, (const char*) b) == 0 && "didn't retrieve correct key");
+    my_assert(k && strcmp((const char*) k, (const char*) b) == 0, "didn't retrieve correct key");
     free((uint8_t*) k);
 
     evict_delete(evict, b);
 
     k = evict_select_for_removal(evict);
-    assert(k && strcmp((const char*) k, (const char*) c) == 0 && "didn't retrieve correct key");
+    my_assert(k && strcmp((const char*) k, (const char*) c) == 0, "didn't retrieve correct key");
     free((uint8_t*) k);
 
     evict_destroy(evict);
@@ -72,7 +76,7 @@ static void test_mem_overflow()
 {
     // test if the cache handles memory overflow correct
     cache_t c = create_cache(10);
-    assert(cache_space_used(c) == 0);
+    my_assert(cache_space_used(c) == 0, "cache space used initialized incorrectly");
     uint8_t key[2] = {'a', '\0'};
     uint8_t val[6] = {10,11,12,13,14,15};
     cache_set(c, key, val, 6);
@@ -81,7 +85,7 @@ static void test_mem_overflow()
     uint8_t val2[6] = {20,21,22,23,24,25};
     cache_set(c, key, val2, 6);
 
-    assert(6 == cache_space_used(c));
+    my_assert(6 == cache_space_used(c), "cache space used after a mem overflow is incorrect");
     destroy_cache(c);
 }
 
@@ -101,7 +105,7 @@ static void test_set_get()
     uint8_t saved_vals[nsets];
 
     cache_t c = create_cache(nsets * 10);
-    assert(cache_space_used(c) == 0);
+    my_assert(cache_space_used(c) == 0, "cache space used initialized incorrectly");
 
     for (uint32_t i = 0; i < nsets; i++) {
         uint32_t key_size = (rand() % 10) + 2;
@@ -118,7 +122,7 @@ static void test_set_get()
         uint32_t size;
         val_type v = cache_get(c, (key_type) saved_keys[i], &size);
         if (* (uint8_t *) v != saved_vals[i]) {
-            assert(false && "test failed!");
+            my_assert(false, "test failed!");
         }
         free((void *) v);
     }
@@ -133,7 +137,7 @@ static void test_set_get()
 static void test_collision()
 {
     cache_t c = create_cache(100);
-    assert(cache_space_used(c) == 0);
+    my_assert(cache_space_used(c) == 0, "cache space is nonzero at initialization");
     uint8_t key[2] = {'a', '\0'};
     uint8_t val[6] = {10,11,12,13,14,15};
     cache_set(c, key, val, 6);
@@ -147,7 +151,7 @@ static void test_collision()
 static void test_space()
 {
     cache_t c = create_cache(100);
-    assert(cache_space_used(c) == 0);
+    my_assert(cache_space_used(c) == 0, "cache space is nonzero at initialization");
     uint8_t key[2] = {'a', '\0'};
     uint8_t val[6] = {10,11,12,13,14,15};
     cache_set(c, key, val, 6);
@@ -156,7 +160,7 @@ static void test_space()
     uint8_t val2[4] = {20,21,22,23};
     cache_set(c, key, val2, 4);
 
-    assert(10 == cache_space_used(c));
+    my_assert(10 == cache_space_used(c), "cache_space_used failed");
 
     destroy_cache(c);
 }
@@ -187,7 +191,6 @@ static int go(struct args *args)
 int main(int argc, char *argv[]) 
 {
     srand(time(NULL));
-    assert(argc && argv);
     struct args args;
     args_init(&args);
     int c, idx;
