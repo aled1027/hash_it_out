@@ -7,21 +7,6 @@
 #include "dbLL_tests.h"
 
 
-
-static void test_dbLL_creation()
-{
-    printf("\n************************************************\n");
-    printf("*** testing CREATION of doubly linked list ***\n");
-    printf("************************************************\n");
-
-    dbLL_t *test_ll = new_list();
-    destroy_list(test_ll);
-
-    printf("\n*** ... done testing creation ***\n");
-    printf("************************************************\n");
-
-}
-
 static void insert_elts_into_list(dbLL_t *test_ll)
 {
     uint8_t key1[2] = {1, '\0'};
@@ -44,12 +29,29 @@ static void insert_elts_into_list(dbLL_t *test_ll)
 
     val = 255;
     ll_insert(test_ll, key4, &val, 1);
+
     printf("************************************************\n");
     printf("*** List after insertion ***********************\n");
     printf("************************************************\n");
     rep_list(test_ll);
     printf("************************************************\n");
 }
+
+static void test_dbLL_creation()
+{
+    printf("\n************************************************\n");
+    printf("*** testing CREATION of doubly linked list ***\n");
+    printf("************************************************\n");
+
+    dbLL_t *test_ll = new_list();
+    destroy_list(test_ll);
+
+    printf("\n*** ... done testing creation ***\n");
+    printf("************************************************\n");
+
+}
+
+
 
 static void test_dbLL_insert()
 {
@@ -58,11 +60,12 @@ static void test_dbLL_insert()
     destroy_list(test_ll);
 }
 
-void test_dbLL_search()
+static void test_dbLL_search()
 {
     printf("\n************************************************\n");
     printf("*** testing SEARCH on the doubly linked list ***\n");
     printf("************************************************\n");
+
     uint8_t val = 0;
     uint8_t *res;
     uint32_t val_size;
@@ -102,15 +105,15 @@ void test_dbLL_search()
     res = (uint8_t *)ll_search(test_ll, key6, &val_size);
     assert(res == NULL);
 
+    //print & destory
     rep_list(test_ll);
     destroy_list(test_ll);
 
     printf("*** ... done testing search\n");
     printf("************************************************\n");
-
 }
 
-void test_dbLL_remove()
+static void test_dbLL_remove()
 {
     printf("\n************************************************\n");
     printf("*** testing REMOVAL on the doubly linked list ***\n");
@@ -156,9 +159,10 @@ void test_dbLL_remove()
     assert(res > 0);
 
     rep_list(test_ll);
+    destroy_list(test_ll);
+
     printf("*** ... done testing removal\n");
     printf("************************************************\n");
-    destroy_list(test_ll);
 }
 
 void dbll_tests()
