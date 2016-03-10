@@ -52,7 +52,6 @@ val_type ll_search(dbLL_t *list, key_type key, uint32_t *val_size)
             cur = cur->next;
         }
     }
-    //printf("Sorry, there wasn't anything with key: %d to find.\n", *key);
     return ret_val;
 }
 
@@ -63,17 +62,17 @@ uint32_t ll_remove_key(dbLL_t *list, key_type key){
         if (*cur->key == *key){
             val_size = cur->val_size;
             if((cur == list->head) && (cur == list->tail)){
-                //printf("cur head & tail ");
+                // printf("cur head & tail ");
                 list->head = NULL;
                 list->tail = NULL;
             }
             else if(cur == list->tail){
-                //printf("cur tail ");
+                // printf("cur tail ");
                 list->tail = list->tail->prev;
                 list->tail->next = NULL;
             }
             else if(cur == list->head){
-                //printf("cur head ");
+                // printf("cur head ");
                 list->head = list->head->next;
                 list->head->prev = NULL;
             }
@@ -81,7 +80,7 @@ uint32_t ll_remove_key(dbLL_t *list, key_type key){
                 cur->prev->next = cur->next;
                 cur->next->prev = cur->prev;
             }
-            //printf("a node with key: %d and value: %d and value size: %d was found and removed.\n", *cur->key, *(uint8_t *)cur->val, val_size);
+            // printf("a node with key: %d and value: %d and value size: %d was found and removed.\n", *cur->key, *(uint8_t *)cur->val, val_size);
             free((void *)cur->key);
             free((void *)cur->val);
             free(cur);
@@ -93,7 +92,7 @@ uint32_t ll_remove_key(dbLL_t *list, key_type key){
         }
     }
     // if(!val_size){
-        //printf("Sorry, there wasn't anything with key: %d to remove.\n", *key);
+    //     printf("Sorry, there wasn't anything with key: %d to remove.\n", *key);
     // }
     return val_size;
 }

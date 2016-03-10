@@ -6,24 +6,13 @@
 #include "dbLL.h"
 #include "dbLL_tests.h"
 
-
-
-dbLL_t *test_dbLL_creation()
-{
-    printf("\n************************************************\n");
-    printf("*** testing CREATION of doubly linked list ***\n");
-    printf("************************************************\n");
-    dbLL_t *test_ll = new_list();
-    printf("\n*** ... done testing creation ***\n");
-    printf("************************************************\n");
-    return test_ll;
-}
-
-void test_dbLL_insert(dbLL_t *test_ll)
+void test_dbLL_insert()
 {
     printf("\n************************************************\n");
     printf("*** testing INSERTION on the doubly linked list ***\n");
     printf("************************************************\n");
+    
+    dbLL_t *test_ll = new_list();
     uint8_t key;
     uint8_t val;
 
@@ -45,20 +34,45 @@ void test_dbLL_insert(dbLL_t *test_ll)
     key = 30;
     val = 255;
     ll_insert(test_ll, &key, &val, 1);
+
+    //print & destroy
     rep_list(test_ll);
+    destroy_list(test_ll);
 
     printf("*** ... done testing insertion ***\n");
     printf("************************************************\n");
 }
 
-void test_dbLL_search(dbLL_t *test_ll)
+void test_dbLL_search()
 {
     printf("\n************************************************\n");
     printf("*** testing SEARCH on the doubly linked list ***\n");
     printf("************************************************\n");
+
+    dbLL_t *test_ll = new_list();
     uint8_t key, val;
     uint8_t *res;
     uint32_t val_size;
+
+    //setup: insert some items
+    key = 1;
+    val = 99;
+    ll_insert(test_ll, &key, &val, 1);
+    rep_list(test_ll);
+
+    key = 89;
+    val = 23;
+    ll_insert(test_ll, &key, &val, 1);
+    rep_list(test_ll);
+
+    key = 12;
+    val = 25;
+    ll_insert(test_ll, &key, &val, 1);
+    rep_list(test_ll);
+
+    key = 30;
+    val = 255;
+    ll_insert(test_ll, &key, &val, 1);
 
     //search for some values in the list
     key = 1;
@@ -81,22 +95,46 @@ void test_dbLL_search(dbLL_t *test_ll)
     res = (uint8_t *)ll_search(test_ll, &key, &val_size);
     assert(res == NULL);
 
+    //print & destory
     rep_list(test_ll);
+    destroy_list(test_ll);
+
     printf("*** ... done testing search\n");
     printf("************************************************\n");
-
-    // TODO free memory 
 }
 
-void test_dbLL_remove(dbLL_t *test_ll)
+void test_dbLL_remove()
 {
     printf("\n************************************************\n");
     printf("*** testing REMOVAL on the doubly linked list ***\n");
     printf("************************************************\n");
+
+    dbLL_t *test_ll = new_list();
     uint8_t key;
     uint8_t val;
     uint32_t res; //actually holds the value size
     rep_list(test_ll);
+
+
+    //setup: insert some items
+    key = 1;
+    val = 99;
+    ll_insert(test_ll, &key, &val, 1);
+    rep_list(test_ll);
+
+    key = 89;
+    val = 23;
+    ll_insert(test_ll, &key, &val, 1);
+    rep_list(test_ll);
+
+    key = 12;
+    val = 25;
+    ll_insert(test_ll, &key, &val, 1);
+    rep_list(test_ll);
+
+    key = 30;
+    val = 255;
+    ll_insert(test_ll, &key, &val, 1);
 
     //remove a middle value
     key = 89;
@@ -138,15 +176,18 @@ void test_dbLL_remove(dbLL_t *test_ll)
     val = 25;
     res = ll_remove_key(test_ll, &key);
     assert(res > 0);
+
+    //print & destory
     rep_list(test_ll);
+    destroy_list(test_ll);
+
     printf("*** ... done testing removal\n");
     printf("************************************************\n");
 }
 
 void dbll_tests()
 {
-    dbLL_t *test_ll = test_dbLL_creation();
-    test_dbLL_insert(test_ll);
-    test_dbLL_search(test_ll);
-    test_dbLL_remove(test_ll);
+    test_dbLL_insert();
+    test_dbLL_search();
+    test_dbLL_remove();
 }
