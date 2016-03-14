@@ -14,6 +14,7 @@
 #define my_assert(value, string) \
 {if (!(value)) { printf("!!!!FAILURE!!!!! %s\n", string);}}
 
+
 static void print_key(key_type key)
 {
     uint32_t i = 0;
@@ -22,6 +23,37 @@ static void print_key(key_type key)
         ++i;
     }
     printf("\n");
+}
+
+static void test_hash_function()
+{
+    // tests whether the hash function is truly deterministic
+    printf("Running cache hash function test\n");
+    cache_t cache = create_cache(100);
+    uint32_t num_trials = 10;
+    uint32_t val_size;
+
+    for (uint32_t i = 0; i < num_trials; ++i) {
+        uint8_t *key = calloc(2, sizeof(uint8_t));
+        key[0] = 'b';
+        key[1] = '\0';
+        cache_set(cache, key, &i, 1);
+        free(key);
+    }
+
+    for (uint32_t i = 0; i < num_trials; ++i) {
+        uint8_t *key = calloc(2, sizeof(uint8_t));
+        key[0] = 'b';
+        key[1] = '\0';
+
+        uint8_t* retrieved_val = (uint8_t*) cache_get(cache, key, &val_size);
+        my_assert(val_size == 1, "hash function not deterministic: val_size fail");
+        my_assert(*retrieved_val == num_trials - 1, "hash function not deterministic: value fail");
+
+        free(key);
+        free(retrieved_val);
+    }
+    destroy_cache(cache);
 }
 
 static void test_delete()
@@ -155,6 +187,7 @@ void cache_tests()
     test_duplicate_key();
     test_space();
     test_delete();
+    test_hash_function();
 }
 
 

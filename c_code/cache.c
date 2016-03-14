@@ -10,8 +10,6 @@
 #include "cache.h"
 
 const bool debug = false;
-
-// What is this best practice for constants? Put them at top of file or in function?
 const float RESET_LOAD_FACTOR = 0.1;
 const float MAX_LOAD_FACTOR = 0.5;
 
